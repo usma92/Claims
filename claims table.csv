@@ -1,0 +1,15 @@
+Dataset,Warehouse,<30 days,30-<60 days,60-<90 days,>= 90 days,Total Open Claims,% >= 90 days
+Chrysler Claims,Charlotte,0,2,1,25,28,0.8928571428571429
+Chrysler Claims,Ontario,0,3,3,18,24,0.75
+Chrysler Claims,Phoenix,0,2,2,18,22,0.8181818181818182
+Chrysler Claims,Orlando,0,6,1,14,21,0.6666666666666666
+Chrysler Claims,Flowood,0,2,2,14,18,0.7777777777777778
+Chrysler Claims,Atlanta,0,1,0,10,11,0.9090909090909091
+Chrysler Claims,OKC,0,0,0,8,8,1.0
+Chrysler Claims,El Paso,0,0,1,4,5,0.8
+Ford Claims,Atlanta,0,2,2,3,7,0.42857142857142855
+Ford Claims,Orlando,0,1,3,2,6,0.3333333333333333
+Ford Claims,Phoenix,0,0,3,0,3,0.0
+Ford Claims,Charlotte,0,0,2,0,2,0.0
+Ford Claims,OKC,0,2,0,0,2,0.0
+Ford Claims,Ontario,0,1,1,0,2,0.0
