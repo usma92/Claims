@@ -70,17 +70,34 @@ def _action_rows(open_tasks_agg, dataset_name):
     return rows
 
 
+def _task_detail_rows(open_tasks_detail, dataset_name):
+    rows = []
+    sub = open_tasks_detail[open_tasks_detail['Dataset'] == dataset_name]
+    for _, r in sub.iterrows():
+        due = str(r['Due Date'])[:10] if pd.notna(r['Due Date']) else ''
+        rows.append({
+            'wh':     str(r['Warehouse']),
+            'action': str(r['Action Required']),
+            'task':   str(r['Task Name']),
+            'due':    due,
+        })
+    return rows
+
+
 def build_data_js():
-    aging_summary  = pd.read_excel(XL, sheet_name='Open_Aging_Summary')
-    combined_all   = pd.read_excel(XL, sheet_name='All_Claims_Combined')
-    open_tasks_agg = pd.read_excel(XL, sheet_name='Open_Tasks_Aggregate')
+    aging_summary      = pd.read_excel(XL, sheet_name='Open_Aging_Summary')
+    combined_all       = pd.read_excel(XL, sheet_name='All_Claims_Combined')
+    open_tasks_agg     = pd.read_excel(XL, sheet_name='Open_Tasks_Aggregate')
+    open_tasks_detail  = pd.read_excel(XL, sheet_name='Open_Tasks_By_Warehouse')
 
     ford_sum   = _summary_rows(aging_summary[aging_summary['Dataset'] == 'Ford Claims'])
     chrys_sum  = _summary_rows(aging_summary[aging_summary['Dataset'] == 'Chrysler Claims'])
     ford_old   = _oldest_rows(combined_all, 'Ford Claims')
     chrys_old  = _oldest_rows(combined_all, 'Chrysler Claims')
-    ford_acts  = _action_rows(open_tasks_agg, 'Ford Claims')
-    chrys_acts = _action_rows(open_tasks_agg, 'Chrysler Claims')
+    ford_acts        = _action_rows(open_tasks_agg, 'Ford Claims')
+    chrys_acts       = _action_rows(open_tasks_agg, 'Chrysler Claims')
+    ford_task_detail = _task_detail_rows(open_tasks_detail, 'Ford Claims')
+    chrys_task_detail= _task_detail_rows(open_tasks_detail, 'Chrysler Claims')
 
     ford_total        = sum(r['total'] for r in ford_sum)
     chrys_total       = sum(r['total'] for r in chrys_sum)
@@ -101,8 +118,10 @@ def build_data_js():
         'const chrysSummary  = {};'.format(json.dumps(chrys_sum,  indent=2)),
         'const fordOldest    = {};'.format(json.dumps(ford_old,   indent=2)),
         'const chrysOldest   = {};'.format(json.dumps(chrys_old,  indent=2)),
-        'const fordActions   = {};'.format(json.dumps(ford_acts,  indent=2)),
-        'const chrysActions  = {};'.format(json.dumps(chrys_acts, indent=2)),
+        'const fordActions       = {};'.format(json.dumps(ford_acts,         indent=2)),
+        'const chrysActions      = {};'.format(json.dumps(chrys_acts,        indent=2)),
+        'const fordTaskDetails   = {};'.format(json.dumps(ford_task_detail,  indent=2)),
+        'const chrysTaskDetails  = {};'.format(json.dumps(chrys_task_detail, indent=2)),
         'const fordTotal     = {};'.format(ford_total),
         'const chrysTotal    = {};'.format(chrys_total),
         'const fordGe90      = {};'.format(ford_ge90),
