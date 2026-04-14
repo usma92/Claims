@@ -1,0 +1,30 @@
+warehouses:
+  - OKC
+  - Atlanta
+  - Orlando
+  - Ontario
+  - El Paso
+  - Flowood
+  - Phoenix
+  - Charlotte
+
+start_date: "2024-01-01"
+end_date:   "2025-12-31"
+
+aging_bins:   [-1, 29, 59, 89, .inf]
+aging_labels:
+  - "<30 days"
+  - "30-<60 days"
+  - "60-<90 days"
+  - ">= 90 days"
+
+max_labels: 25
+fig_dpi:    150
+fig_size:   [8, 4.6]
+
+inputs:
+  Ford Claims:     "Ford Claims Planner.xlsx"
+  Chrysler Claims: "Chrysler Claims Planner.xlsx"
+
+export_excel:  true
+export_charts: true
