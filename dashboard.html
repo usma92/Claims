@@ -349,73 +349,360 @@
 
 <script>
 // @@DATA_START@@
-const fordSummary = [
-  {wh:"Charlotte", lt30:12, d30:3, d60:1, ge90:0, total:16},
-  {wh:"Phoenix",   lt30:6,  d30:3, d60:0, ge90:0, total:9},
-  {wh:"Orlando",   lt30:6,  d30:3, d60:0, ge90:0, total:9},
-  {wh:"Ontario",   lt30:5,  d30:3, d60:0, ge90:0, total:8},
-  {wh:"Atlanta",   lt30:4,  d30:1, d60:1, ge90:0, total:6},
-  {wh:"Flowood",   lt30:2,  d30:2, d60:0, ge90:0, total:4},
-  {wh:"El Paso",   lt30:2,  d30:0, d60:0, ge90:0, total:2},
-  {wh:"OKC",       lt30:1,  d30:0, d60:0, ge90:0, total:1},
+const AS_OF         = "April 14, 2026";
+const fordSummary   = [
+  {
+    "wh": "Charlotte",
+    "lt30": 12,
+    "d30": 3,
+    "d60": 1,
+    "ge90": 0,
+    "total": 16,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Phoenix",
+    "lt30": 6,
+    "d30": 3,
+    "d60": 0,
+    "ge90": 0,
+    "total": 9,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Orlando",
+    "lt30": 6,
+    "d30": 3,
+    "d60": 0,
+    "ge90": 0,
+    "total": 9,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Ontario",
+    "lt30": 5,
+    "d30": 3,
+    "d60": 0,
+    "ge90": 0,
+    "total": 8,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Atlanta",
+    "lt30": 4,
+    "d30": 1,
+    "d60": 1,
+    "ge90": 0,
+    "total": 6,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Flowood",
+    "lt30": 2,
+    "d30": 2,
+    "d60": 0,
+    "ge90": 0,
+    "total": 4,
+    "pct90": 0.0
+  },
+  {
+    "wh": "El Paso",
+    "lt30": 2,
+    "d30": 0,
+    "d60": 0,
+    "ge90": 0,
+    "total": 2,
+    "pct90": 0.0
+  },
+  {
+    "wh": "OKC",
+    "lt30": 1,
+    "d30": 0,
+    "d60": 0,
+    "ge90": 0,
+    "total": 1,
+    "pct90": 0.0
+  }
 ];
-
-const chrysSummary = [
-  {wh:"Charlotte", lt30:6,  d30:7, d60:0, ge90:2, total:15},
-  {wh:"Atlanta",   lt30:2,  d30:2, d60:4, ge90:1, total:9},
-  {wh:"El Paso",   lt30:4,  d30:3, d60:2, ge90:0, total:9},
-  {wh:"Flowood",   lt30:4,  d30:0, d60:1, ge90:3, total:8},
-  {wh:"Orlando",   lt30:3,  d30:3, d60:2, ge90:0, total:8},
-  {wh:"Phoenix",   lt30:1,  d30:4, d60:1, ge90:0, total:6},
-  {wh:"Ontario",   lt30:0,  d30:3, d60:0, ge90:2, total:5},
-  {wh:"OKC",       lt30:1,  d30:2, d60:0, ge90:1, total:4},
+const chrysSummary  = [
+  {
+    "wh": "Charlotte",
+    "lt30": 6,
+    "d30": 7,
+    "d60": 0,
+    "ge90": 2,
+    "total": 15,
+    "pct90": 13.3
+  },
+  {
+    "wh": "Atlanta",
+    "lt30": 2,
+    "d30": 2,
+    "d60": 4,
+    "ge90": 1,
+    "total": 9,
+    "pct90": 11.1
+  },
+  {
+    "wh": "El Paso",
+    "lt30": 4,
+    "d30": 3,
+    "d60": 2,
+    "ge90": 0,
+    "total": 9,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Flowood",
+    "lt30": 4,
+    "d30": 0,
+    "d60": 1,
+    "ge90": 3,
+    "total": 8,
+    "pct90": 37.5
+  },
+  {
+    "wh": "Orlando",
+    "lt30": 3,
+    "d30": 3,
+    "d60": 2,
+    "ge90": 0,
+    "total": 8,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Phoenix",
+    "lt30": 1,
+    "d30": 4,
+    "d60": 1,
+    "ge90": 0,
+    "total": 6,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Ontario",
+    "lt30": 0,
+    "d30": 3,
+    "d60": 0,
+    "ge90": 2,
+    "total": 5,
+    "pct90": 40.0
+  },
+  {
+    "wh": "OKC",
+    "lt30": 1,
+    "d30": 2,
+    "d60": 0,
+    "ge90": 1,
+    "total": 4,
+    "pct90": 25.0
+  }
 ];
-
-const fordOldest = [
-  {task:"ML3Z7000E - 04178 - LEADER FORD LLC DBA LAKE KEOWEE FORD", warehouse:"Charlotte", days:77, start:"2026-01-27"},
-  {task:"FR3Z7L596A - 05936 - MCCLARY FORD LINCOLN MERCURY",         warehouse:"Atlanta",   days:60, start:"2026-02-13"},
-  {task:"LC3Z6006B - 05162 - RUSH TRUCK CENTER WHITTIER",            warehouse:"Ontario",   days:57, start:"2026-02-16"},
-  {task:"GF1Z6006DRM - 09681 - DAVID WILSON FORD",                   warehouse:"Charlotte", days:57, start:"2026-02-16"},
-  {task:"LC3Z6006B - 05162 - RUSH TRUCK WHITTIER",                   warehouse:"Ontario",   days:56, start:"2026-02-17"},
-  {task:"L1MZ7000G - 00905 - PARKWAY FORD, INC.",                    warehouse:"Charlotte", days:50, start:"2026-02-23"},
-  {task:"AL3Z6006DARM - PO-0172184 - 01699",                         warehouse:"Flowood",   days:49, start:"2026-02-24"},
-  {task:"JL3Z7000CRM - P1000834 - 01440",                            warehouse:"Phoenix",   days:49, start:"2026-02-24"},
-  {task:"LC3Z6006B - P1000859 - 00869",                              warehouse:"Ontario",   days:49, start:"2026-02-24"},
-  {task:"DR3Z7L596A - 04908 - SAWGRASS FORD",                        warehouse:"Orlando",   days:43, start:"2026-03-02"},
+const fordOldest    = [
+  {
+    "task": "ML3Z7000E \u2013 04178 \u2013 LEADER FORD LLC DBA LAKE KEOWEE FORD",
+    "warehouse": "Charlotte",
+    "days": 77,
+    "start": "2026-01-27"
+  },
+  {
+    "task": "FR3Z7L596A \u2013 05936 \u2013 MCCLARY FORD LINCOLN MERCURY",
+    "warehouse": "Atlanta",
+    "days": 60,
+    "start": "2026-02-13"
+  },
+  {
+    "task": "LC3Z6006B \u2013 05162 \u2013 RUSH TRUCK CENTER WHITTIER",
+    "warehouse": "Ontario",
+    "days": 57,
+    "start": "2026-02-16"
+  },
+  {
+    "task": "GF1Z6006DRM- 09681- DAVID WILSON FORD - CLAIM 127857",
+    "warehouse": "Charlotte",
+    "days": 57,
+    "start": "2026-02-16"
+  },
+  {
+    "task": "LC3Z6006B \u2013 05162 \u2013 RUSH TRUCK WHITTIER",
+    "warehouse": "Ontario",
+    "days": 56,
+    "start": "2026-02-17"
+  },
+  {
+    "task": "L1MZ7000G \u2013 00905 \u2013 PARKWAY FORD, INC.",
+    "warehouse": "Charlotte",
+    "days": 50,
+    "start": "2026-02-23"
+  },
+  {
+    "task": "AL3Z6006DARM \u2013 PO-0172184 \u2013 01699",
+    "warehouse": "Flowood",
+    "days": 49,
+    "start": "2026-02-24"
+  },
+  {
+    "task": "JL3Z7000CRM \u2013 P1000834 \u2013 01440",
+    "warehouse": "Phoenix",
+    "days": 49,
+    "start": "2026-02-24"
+  },
+  {
+    "task": "LC3Z6006B \u2013 P1000859 \u2013 00869",
+    "warehouse": "Ontario",
+    "days": 49,
+    "start": "2026-02-24"
+  },
+  {
+    "task": "DR3Z7L596A \u2013 04908 \u2013 SAWGRASS FORD",
+    "warehouse": "Orlando",
+    "days": 43,
+    "start": "2026-03-02"
+  }
 ];
-
-const chrysOldest = [
-  {task:"CHRYSLER DAMAGE - R8450915AA - Inv 3812564 - SPARTANBURG CDJ",    warehouse:"Charlotte", days:98, start:"2026-01-06"},
-  {task:"CHRYSLER VISIBLE DAMAGE - R8453637AB - SERIAL# M3251495",         warehouse:"Atlanta",   days:98, start:"2026-01-06"},
-  {task:"CHRYSLER DAMAGE - R8156209AH - Inv 3759140 - BOB HOWARD CJDR",    warehouse:"OKC",       days:96, start:"2026-01-08"},
-  {task:"CHRYSLER DAMAGE - R8071553AA - Inv 3687799 - EWP",                warehouse:"Flowood",   days:96, start:"2026-01-08"},
-  {task:"CHRYSLER DAMAGE - R8149703AJ - Inv 3778437 - WALKER CDJR",        warehouse:"Flowood",   days:96, start:"2026-01-08"},
-  {task:"CHRYSLER DAMAGE - R8149703AJ - Inv 3794864 - HEMET CDJR",         warehouse:"Ontario",   days:96, start:"2026-01-08"},
-  {task:"CHRYSLER DAMAGE - R8447797AA - Inv 3482937 - WANESVILLE CDJR",    warehouse:"Charlotte", days:96, start:"2026-01-08"},
-  {task:"CHRYSLER OUTBOUND DAMAGE - Inv 3828456 - R8453637AB",             warehouse:"Flowood",   days:95, start:"2026-01-09"},
-  {task:"CHRYSLER DAMAGE - R8225256AA - Inv 3733721 - VICTORVILLE MOTORS", warehouse:"Ontario",   days:92, start:"2026-01-12"},
-  {task:"CHRYSLER DAMAGE - R8411264AA - Inv 3875997 - ARRIGO CDJR",        warehouse:"Orlando",   days:81, start:"2026-01-23"},
+const chrysOldest   = [
+  {
+    "task": "CHRYSLER DAMAGE \u2013 R8450915AA \u2013 Inv 3812564",
+    "warehouse": "Charlotte",
+    "days": 98,
+    "start": "2026-01-06"
+  },
+  {
+    "task": "CHRYSLER VISIBLE DAMAGE -R8453637AB \u2013 SERIAL# M3251495 \u2013 PO 1320103",
+    "warehouse": "Atlanta",
+    "days": 98,
+    "start": "2026-01-06"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 R8156209AH \u2013 Inv 3759140",
+    "warehouse": "OKC",
+    "days": 96,
+    "start": "2026-01-08"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 R8071553AA \u2013 Inv 3687799",
+    "warehouse": "Flowood",
+    "days": 96,
+    "start": "2026-01-08"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 R8149703AJ \u2013 Inv 3778437",
+    "warehouse": "Flowood",
+    "days": 96,
+    "start": "2026-01-08"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 R8149703AJ \u2013 Inv 3794864",
+    "warehouse": "Ontario",
+    "days": 96,
+    "start": "2026-01-08"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 R8447797AA \u2013 Inv 3482937",
+    "warehouse": "Charlotte",
+    "days": 96,
+    "start": "2026-01-08"
+  },
+  {
+    "task": "CHRYSLER OUTBOUND DAMAGE  \u2013 Inv 3828456 \u2013 R8453637AB",
+    "warehouse": "Flowood",
+    "days": 95,
+    "start": "2026-01-09"
+  },
+  {
+    "task": "CHRYSLER DAMAGE  \u2013 R8225256AA \u2013 Inv 3733721",
+    "warehouse": "Ontario",
+    "days": 92,
+    "start": "2026-01-12"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 R8411264AA \u2013 Inv 3875997",
+    "warehouse": "Orlando",
+    "days": 81,
+    "start": "2026-01-23"
+  }
 ];
-
-const fordActions = [
-  {wh:"Charlotte", action:"WH P/U from Dealer", count:8},
-  {wh:"Charlotte", action:"WH Please Respond",  count:4},
-  {wh:"Orlando",   action:"WH P/U from Dealer", count:4},
-  {wh:"Phoenix",   action:"WH P/U from Dealer", count:4},
-  {wh:"Atlanta",   action:"WH P/U from Dealer", count:3},
-  {wh:"Ontario",   action:"WH P/U from Dealer", count:3},
-  {wh:"Ontario",   action:"WH Please Respond",  count:1},
+const fordActions   = [
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "count": 8
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH PLEASE RESPOND",
+    "count": 4
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from Dealer",
+    "count": 4
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from Dealer",
+    "count": 4
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from Dealer",
+    "count": 3
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from Dealer",
+    "count": 3
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH PLEASE RESPOND",
+    "count": 1
+  }
 ];
-
-const chrysActions = [
-  {wh:"Charlotte", action:"WH P/U from Dealer", count:7},
-  {wh:"Flowood",   action:"WH P/U from Dealer", count:2},
-  {wh:"Phoenix",   action:"WH P/U from Dealer", count:2},
-  {wh:"Atlanta",   action:"WH P/U from Dealer", count:1},
-  {wh:"Charlotte", action:"WH Please Respond",  count:1},
-  {wh:"OKC",       action:"WH P/U from Dealer", count:1},
+const chrysActions  = [
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from dealer",
+    "count": 7
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from dealer",
+    "count": 2
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from dealer",
+    "count": 2
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from dealer",
+    "count": 1
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH Please Respond",
+    "count": 1
+  },
+  {
+    "wh": "OKC",
+    "action": "WH P/U from dealer",
+    "count": 1
+  }
 ];
-
+const fordTotal     = 55;
+const chrysTotal    = 64;
+const fordGe90      = 0;
+const chrysGe90     = 9;
+const fordBiggestWh = "Charlotte";
+const fordBiggestN  = 16;
+const chrysBiggestWh= "Charlotte";
+const chrysBiggestN = 15;
+const fordOldestDays  = 77;
+const fordOldestWh    = "Charlotte";
+const chrysOldestDays = 98;
+const chrysOldestWh   = "Charlotte";
 // @@DATA_END@@
 // ─── CHART HELPERS ───────────────────────────────────────
 const AGE_COLORS = ["#22c55e","#facc15","#f97316","#ef4444"];

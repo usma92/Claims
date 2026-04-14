@@ -30,7 +30,7 @@ cell_lines = [
     "\n",
     "def _oldest_rows(dataset_name, n=10):\n",
     "    import pandas as _pd\n",
-    "    df = combined_all_filtered.copy()\n",
+    "    df = combined_all.copy()\n",
     "    open_df = df[(df['Dataset'] == dataset_name) & (df['Progress'] != 'Completed')].copy()\n",
     "    open_df['Start Date'] = _pd.to_datetime(open_df['Start Date'], errors='coerce')\n",
     "    today = _pd.Timestamp('today').normalize()\n",
