@@ -1,363 +1,1287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Claims Aging Dashboard — Apr 30, 2026</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claims Aging Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg:       #0f1117;
-    --surface:  #1a1d27;
-    --border:   #2a2d3a;
-    --text:     #e2e8f0;
-    --muted:    #8892a4;
-    --accent:   #3b82f6;
-    --danger:   #ef4444;
-    --warn:     #f59e0b;
-    --ok:       #22c55e;
-    --ford:     #1d4ed8;
-    --chrysler: #7c3aed;
-    --bucket0:  #22c55e;
-    --bucket1:  #f59e0b;
-    --bucket2:  #f97316;
-    --bucket3:  #ef4444;
+    --ford-blue: #003478;
+    --ford-light: #e8f0fb;
+    --chrys-red: #8B0000;
+    --chrys-light: #fbeaea;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e2e8f0;
+    --age1: #22c55e;
+    --age2: #facc15;
+    --age3: #f97316;
+    --age4: #ef4444;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
-    padding: 24px;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
 
-  /* ── Header ── */
-  .header {
+  header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    padding: 20px 32px;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 16px;
-    margin-bottom: 24px;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
-  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
-  .header .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 99px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-  }
-  .badge-danger { background: rgba(239,68,68,.15); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
-  .badge-warn   { background: rgba(245,158,11,.15); color: var(--warn);   border: 1px solid rgba(245,158,11,.3); }
+  header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+  header .subtitle { font-size: 0.8rem; opacity: 0.65; margin-top: 2px; }
+  header .as-of { font-size: 0.8rem; opacity: 0.7; text-align: right; }
 
-  /* ── KPI cards ── */
-  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 28px; }
-  .kpi {
-    background: var(--surface);
-    border: 1px solid var(--border);
+  .brand-section {
+    margin: 28px 32px;
+  }
+  .brand-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid;
+  }
+  .brand-header.ford { border-color: var(--ford-blue); }
+  .brand-header.chrys { border-color: var(--chrys-red); }
+  .brand-badge {
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 4px 14px;
+    border-radius: 6px;
+    color: white;
+  }
+  .brand-badge.ford { background: var(--ford-blue); }
+  .brand-badge.chrys { background: var(--chrys-red); }
+  .brand-total { font-size: 1rem; color: var(--muted); }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    background: var(--card);
     border-radius: 10px;
     padding: 16px 18px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
-  .kpi .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-  .kpi .value { font-size: 28px; font-weight: 700; line-height: 1; }
-  .kpi .value.red  { color: var(--danger); }
-  .kpi .value.blue { color: #60a5fa; }
-  .kpi .value.purple { color: #a78bfa; }
-  .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .stat-card .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 4px; }
+  .stat-card .value { font-size: 1.7rem; font-weight: 700; line-height: 1; }
+  .stat-card .sub { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+  .stat-card.warn .value { color: var(--age4); }
+  .stat-card.caution .value { color: var(--age3); }
 
-  /* ── Section titles ── */
-  .section-title {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    color: var(--muted);
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .card h3 {
+    font-size: 0.8rem;
     text-transform: uppercase;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-  .dot-ford { background: #60a5fa; }
-  .dot-chrysler { background: #a78bfa; }
-  .dot-warn { background: var(--danger); }
-
-  /* ── Chart panels ── */
-  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
-  @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px 22px 18px;
-  }
-  .panel-title {
-    font-size: 14px;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 16px;
     font-weight: 600;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
   }
-  .panel-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
-  .chart-wrap { position: relative; height: 260px; }
+  .chart-wrap { position: relative; height: 240px; }
 
-  /* ── Alert callout ── */
-  .callout {
-    background: rgba(239,68,68,.08);
-    border: 1px solid rgba(239,68,68,.25);
-    border-left: 3px solid var(--danger);
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 20px;
-    font-size: 12.5px;
-    color: #fca5a5;
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 18px;
+    margin-bottom: 28px;
   }
 
-  /* ── Table ── */
-  .table-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-  .table-header {
-    padding: 16px 20px 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  table { width: 100%; border-collapse: collapse; }
-  thead tr { background: rgba(255,255,255,.03); }
-  th {
+  /* Oldest claims table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead th {
     text-align: left;
-    padding: 10px 14px;
-    font-size: 11px;
-    font-weight: 600;
+    padding: 7px 10px;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.06em;
     color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  td {
-    padding: 10px 14px;
-    font-size: 13px;
-    border-bottom: 1px solid rgba(255,255,255,.04);
-    vertical-align: middle;
-  }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,.03); }
-  .tag {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
+    border-bottom: 2px solid var(--border);
     font-weight: 600;
   }
-  .tag-ford     { background: rgba(59,130,246,.15); color: #93c5fd; }
-  .tag-chrysler { background: rgba(124,58,237,.15); color: #c4b5fd; }
-  .age-chip {
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 8px 10px; vertical-align: middle; }
+  tbody tr:hover { background: #f8fafc; }
+  .days-badge {
     display: inline-block;
     padding: 2px 8px;
-    border-radius: 99px;
-    font-size: 11px;
+    border-radius: 12px;
     font-weight: 700;
+    font-size: 0.78rem;
+    min-width: 44px;
+    text-align: center;
   }
-  .age-critical { background: rgba(239,68,68,.15); color: #fca5a5; }
-  .age-high     { background: rgba(249,115,22,.15); color: #fdba74; }
+  .days-badge.d90  { background: #fee2e2; color: #991b1b; }
+  .days-badge.d60  { background: #ffedd5; color: #9a3412; }
+  .days-badge.d30  { background: #fef9c3; color: #854d0e; }
+  .days-badge.d0   { background: #dcfce7; color: #166534; }
+  .wh-tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    background: #eff6ff;
+    color: #1e40af;
+    font-weight: 500;
+  }
 
-  /* ── Footer ── */
-  .footer { color: var(--muted); font-size: 11px; text-align: center; padding-top: 8px; }
+  /* Action items mini table */
+  .action-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .action-table thead th {
+    text-align: left;
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border);
+    font-weight: 600;
+  }
+  .action-table tbody td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  .action-table tbody tr:last-child td { border-bottom: none; }
+
+  .legend-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 0 32px; }
+
+  /* Action count — clickable */
+  .count-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .count-btn:hover  { opacity: 0.82; transform: scale(1.1); }
+  .count-btn:active { transform: scale(0.96); }
+  .count-btn.ford  { background: var(--ford-blue); }
+  .count-btn.chrys { background: var(--chrys-red); }
+
+  /* Modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    width: min(680px, 92vw);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .modal-title { font-size: 0.95rem; font-weight: 700; }
+  .modal-sub   { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+  .modal-close {
+    background: none; border: none; cursor: pointer;
+    font-size: 1.3rem; color: var(--muted); line-height: 1;
+    padding: 0 2px; flex-shrink: 0;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { overflow-y: auto; padding: 0 22px 20px; }
+  .modal-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 14px; }
+  .modal-table thead th {
+    text-align: left; padding: 7px 10px;
+    font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--muted);
+    border-bottom: 2px solid var(--border); font-weight: 600;
+    position: sticky; top: 0; background: var(--card);
+  }
+  .modal-table tbody td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .modal-table tbody tr:last-child td { border-bottom: none; }
+  .modal-table tbody tr:hover { background: #f8fafc; }
+  .due-overdue { color: #dc2626; font-weight: 600; }
 </style>
 </head>
 <body>
 
-<div class="header">
+<header>
   <div>
     <h1>Claims Aging Dashboard</h1>
-    <div class="sub">Open Claims · Ford &amp; Chrysler · All Warehouses &nbsp;·&nbsp; Generated Apr 30, 2026</div>
+    <div class="subtitle">Open claim aging &amp; warehouse performance</div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;padding-top:4px;">
-    <span class="badge badge-danger">⚠ All open claims ≥ 90 days</span>
+  <div class="as-of">As of April 14, 2026</div>
+</header>
+
+<!-- ═══════════════════════ FORD ═══════════════════════ -->
+<div class="brand-section">
+  <div class="brand-header ford">
+    <span class="brand-badge ford">FORD</span>
+    <span class="brand-total">55 open claims across 8 warehouses</span>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="label">Total Open</div>
+      <div class="value">55</div>
+      <div class="sub">across 8 warehouses</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Largest WH</div>
+      <div class="value">Charlotte</div>
+      <div class="sub">16 open claims</div>
+    </div>
+    <div class="stat-card caution">
+      <div class="label">60–89 Days</div>
+      <div class="value">2</div>
+      <div class="sub">need attention</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Oldest Claim</div>
+      <div class="value">77</div>
+      <div class="sub">days open (Charlotte)</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="card">
+      <h3>Open Claims by Warehouse</h3>
+      <div class="chart-wrap">
+        <canvas id="fordBarChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Aging Breakdown by Warehouse</h3>
+      <div class="chart-wrap">
+        <canvas id="fordAgingChart"></canvas>
+      </div>
+      <div class="legend-row">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--age1)"></div>&lt;30 days</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--age2)"></div>30–59 days</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--age3)"></div>60–89 days</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--age4)"></div>≥90 days</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <div class="card">
+      <h3>Oldest Open Claims — Ford</h3>
+      <table>
+        <thead>
+          <tr><th>#</th><th>Claim</th><th>Warehouse</th><th>Opened</th><th>Days Open</th></tr>
+        </thead>
+        <tbody id="fordOldestBody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Pending Warehouse Actions — Ford</h3>
+      <table class="action-table">
+        <thead>
+          <tr><th>Warehouse</th><th>Action</th><th>Count</th></tr>
+        </thead>
+        <tbody id="fordActionsBody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- KPI Cards -->
-<div class="kpi-row" id="kpi-row"></div>
+<hr class="divider">
 
-<!-- Alert callout -->
-<div class="callout">
-  <strong>Aging Alert:</strong> 100% of open claims across both datasets have exceeded 90 days. No claims remain in &lt;30, 30–60, or 60–90 day buckets. Immediate warehouse follow-up required on all open items below.
-</div>
-
-<!-- Charts -->
-<div class="charts-row">
-  <div class="panel">
-    <div class="panel-title"><span class="dot dot-ford"></span>Ford Claims — Open Aging by Warehouse</div>
-    <div class="panel-sub">Count of open claims per warehouse · All in ≥ 90 day bucket</div>
-    <div class="chart-wrap"><canvas id="fordChart"></canvas></div>
+<!-- ═══════════════════════ CHRYSLER ═══════════════════════ -->
+<div class="brand-section">
+  <div class="brand-header chrys">
+    <span class="brand-badge chrys">CHRYSLER</span>
+    <span class="brand-total">64 open claims across 8 warehouses</span>
   </div>
-  <div class="panel">
-    <div class="panel-title"><span class="dot dot-chrysler"></span>Chrysler Claims — Open Aging by Warehouse</div>
-    <div class="panel-sub">Count of open claims per warehouse · All in ≥ 90 day bucket</div>
-    <div class="chart-wrap"><canvas id="chryslerChart"></canvas></div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="label">Total Open</div>
+      <div class="value">64</div>
+      <div class="sub">across 8 warehouses</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Largest WH</div>
+      <div class="value">Charlotte</div>
+      <div class="sub">15 open claims</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="label">≥90 Days</div>
+      <div class="value">9</div>
+      <div class="sub">critical — need action</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="label">Oldest Claim</div>
+      <div class="value">98</div>
+      <div class="sub">days open (Charlotte)</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="card">
+      <h3>Open Claims by Warehouse</h3>
+      <div class="chart-wrap">
+        <canvas id="chrysBarChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Aging Breakdown by Warehouse</h3>
+      <div class="chart-wrap">
+        <canvas id="chrysAgingChart"></canvas>
+      </div>
+      <div class="legend-row">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--age1)"></div>&lt;30 days</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--age2)"></div>30–59 days</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--age3)"></div>60–89 days</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--age4)"></div>≥90 days</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <div class="card">
+      <h3>Oldest Open Claims — Chrysler</h3>
+      <table>
+        <thead>
+          <tr><th>#</th><th>Claim</th><th>Warehouse</th><th>Opened</th><th>Days Open</th></tr>
+        </thead>
+        <tbody id="chrysOldestBody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Pending Warehouse Actions — Chrysler</h3>
+      <table class="action-table">
+        <thead>
+          <tr><th>Warehouse</th><th>Action</th><th>Count</th></tr>
+        </thead>
+        <tbody id="chrysActionsBody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- WH Please Respond Table -->
-<div class="section-title"><span class="dot dot-warn"></span>WH Please Respond — Action Required</div>
-<div class="table-panel">
-  <table id="respond-table">
-    <thead>
-      <tr>
-        <th>Dataset</th>
-        <th>Warehouse</th>
-        <th>Task</th>
-        <th>Age (Days)</th>
-        <th>Due Date</th>
-        <th>Label</th>
-      </tr>
-    </thead>
-    <tbody id="respond-tbody"></tbody>
-  </table>
+<!-- Action detail modal -->
+<div class="modal-backdrop" id="actionModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-sub"  id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <table class="modal-table">
+        <thead><tr><th>#</th><th>Claim / Task</th><th>Due Date</th></tr></thead>
+        <tbody id="modalTableBody"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
-
-<div class="footer">Claims Aging Pipeline · data/raw → data/exports · Refresh by re-running 00_claims_aging_pipeline.ipynb</div>
 
 <script>
-// ── Embedded data ──────────────────────────────────────────────────────────
-const DATA = {
-  buckets: ["<30 days","30-<60 days","60-<90 days",">= 90 days"],
-  ford_warehouses: ["OKC","Atlanta","Orlando","Ontario","Flowood","Phoenix","Charlotte"],
-  ford_data: {
-    "OKC":       [0,0,0,2],
-    "Atlanta":   [0,0,0,13],
-    "Orlando":   [0,0,0,9],
-    "Ontario":   [0,0,0,5],
-    "Flowood":   [0,0,0,3],
-    "Phoenix":   [0,0,0,8],
-    "Charlotte": [0,0,0,6]
+// @@DATA_START@@
+const AS_OF             = "April 30, 2026";
+const fordSummary       = [
+  {
+    "wh": "Charlotte",
+    "lt30": 12,
+    "d30": 4,
+    "d60": 0,
+    "ge90": 1,
+    "total": 17,
+    "pct90": 5.9
   },
-  chrysler_warehouses: ["OKC","Atlanta","Orlando","Ontario","El Paso","Flowood","Phoenix","Charlotte"],
-  chrysler_data: {
-    "OKC":       [0,0,0,9],
-    "Atlanta":   [0,0,0,13],
-    "Orlando":   [0,0,0,22],
-    "Ontario":   [0,0,0,26],
-    "El Paso":   [0,0,0,6],
-    "Flowood":   [0,0,0,23],
-    "Phoenix":   [0,0,0,22],
-    "Charlotte": [0,0,0,31]
+  {
+    "wh": "Orlando",
+    "lt30": 12,
+    "d30": 5,
+    "d60": 0,
+    "ge90": 0,
+    "total": 17,
+    "pct90": 0.0
   },
-  wh_respond: [
-    {"dataset":"Ford Claims","warehouse":"Atlanta","task":"FL3Z7902FRM - 05783 -PO 170428 SHARP MOTOR CO INC - S39-01484050 - 3007613","age_days":198,"due_date":"2026-01-27","label":"WH PLEASE RESPOND"},
-    {"dataset":"Ford Claims","warehouse":"Atlanta","task":"YC3Z7L596AA - 00402 - PO 170621 - AKINS FORD CORPORATION - S39-01497743 - 30318","age_days":176,"due_date":"2026-01-27","label":"WH PLEASE RESPOND"},
-    {"dataset":"Ford Claims","warehouse":"Atlanta","task":"LC3Z7000QRM - 00845 - STIVERS FORD SOUTH - S39-01491044 - 2843868","age_days":169,"due_date":"2026-02-02","label":"WH PLEASE RESPOND"},
-    {"dataset":"Chrysler Claims","warehouse":"Orlando","task":"CHRYSLER DAMAGE - PART# R8370968AB - Inv 3360420 - JERRY ULM - CLAIM 038619","age_days":274,"due_date":"2025-10-20","label":"WH Please Respond"},
-    {"dataset":"Chrysler Claims","warehouse":"Orlando","task":"ORLANDO - CHRYSLER PICKING ERROR - PO 1320791 - WRONG PART SHIPPED","age_days":131,"due_date":"2025-12-23","label":"WH Please Respond"},
-    {"dataset":"Chrysler Claims","warehouse":"Phoenix","task":"CHRYSLER OUTBOUND LOST - R8447797AA - CTXD10/DICK POE DODGE - INV 3478024","age_days":239,"due_date":"2026-01-28","label":"WH Please Respond"}
-  ]
-};
+  {
+    "wh": "Ontario",
+    "lt30": 4,
+    "d30": 5,
+    "d60": 1,
+    "ge90": 1,
+    "total": 11,
+    "pct90": 9.1
+  },
+  {
+    "wh": "Atlanta",
+    "lt30": 4,
+    "d30": 4,
+    "d60": 1,
+    "ge90": 0,
+    "total": 9,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Phoenix",
+    "lt30": 4,
+    "d30": 4,
+    "d60": 1,
+    "ge90": 0,
+    "total": 9,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Flowood",
+    "lt30": 4,
+    "d30": 1,
+    "d60": 0,
+    "ge90": 0,
+    "total": 5,
+    "pct90": 0.0
+  },
+  {
+    "wh": "El Paso",
+    "lt30": 1,
+    "d30": 0,
+    "d60": 0,
+    "ge90": 0,
+    "total": 1,
+    "pct90": 0.0
+  },
+  {
+    "wh": "OKC",
+    "lt30": 1,
+    "d30": 0,
+    "d60": 0,
+    "ge90": 0,
+    "total": 1,
+    "pct90": 0.0
+  }
+];
+const chrysSummary      = [
+  {
+    "wh": "Charlotte",
+    "lt30": 7,
+    "d30": 7,
+    "d60": 3,
+    "ge90": 15,
+    "total": 32,
+    "pct90": 46.9
+  },
+  {
+    "wh": "Orlando",
+    "lt30": 3,
+    "d30": 3,
+    "d60": 3,
+    "ge90": 12,
+    "total": 21,
+    "pct90": 57.1
+  },
+  {
+    "wh": "Ontario",
+    "lt30": 4,
+    "d30": 1,
+    "d60": 2,
+    "ge90": 13,
+    "total": 20,
+    "pct90": 65.0
+  },
+  {
+    "wh": "Phoenix",
+    "lt30": 4,
+    "d30": 1,
+    "d60": 4,
+    "ge90": 11,
+    "total": 20,
+    "pct90": 55.0
+  },
+  {
+    "wh": "Flowood",
+    "lt30": 2,
+    "d30": 2,
+    "d60": 0,
+    "ge90": 14,
+    "total": 18,
+    "pct90": 77.8
+  },
+  {
+    "wh": "Atlanta",
+    "lt30": 6,
+    "d30": 1,
+    "d60": 2,
+    "ge90": 8,
+    "total": 17,
+    "pct90": 47.1
+  },
+  {
+    "wh": "El Paso",
+    "lt30": 4,
+    "d30": 2,
+    "d60": 4,
+    "ge90": 4,
+    "total": 14,
+    "pct90": 28.6
+  },
+  {
+    "wh": "OKC",
+    "lt30": 0,
+    "d30": 0,
+    "d60": 0,
+    "ge90": 2,
+    "total": 2,
+    "pct90": 100.0
+  }
+];
+const fordOldest        = [
+  {
+    "task": "9C2Z6006BARM \u2013 05389 \u2013 KEARNY PEARSON FORD",
+    "warehouse": "Ontario",
+    "days": 163,
+    "start": "2025-11-18"
+  },
+  {
+    "task": "ML3Z7000E \u2013 04178 \u2013 LEADER FORD LLC DBA LAKE KEOWEE FORD",
+    "warehouse": "Charlotte",
+    "days": 93,
+    "start": "2026-01-27"
+  },
+  {
+    "task": "FR3Z7L596A \u2013 05936 \u2013 MCCLARY FORD LINCOLN MERCURY",
+    "warehouse": "Atlanta",
+    "days": 76,
+    "start": "2026-02-13"
+  },
+  {
+    "task": "LC3Z6006B \u2013 05162 \u2013 RUSH TRUCK WHITTIER",
+    "warehouse": "Ontario",
+    "days": 72,
+    "start": "2026-02-17"
+  },
+  {
+    "task": "JL3Z7000CRM \u2013 P1000834 \u2013 01440",
+    "warehouse": "Phoenix",
+    "days": 65,
+    "start": "2026-02-24"
+  },
+  {
+    "task": "DR3Z7L596A \u2013 04908 \u2013 SAWGRASS FORD",
+    "warehouse": "Orlando",
+    "days": 59,
+    "start": "2026-03-02"
+  },
+  {
+    "task": "GC4Z6007DARM \u2013 08972 \u2013 LHM FORD MFD DBA LARRY H MILLER FORD MESA",
+    "warehouse": "Phoenix",
+    "days": 58,
+    "start": "2026-03-03"
+  },
+  {
+    "task": "BL3Z7153B \u2013 06394 \u2013 BECK FORD LINCOLN",
+    "warehouse": "Orlando",
+    "days": 58,
+    "start": "2026-03-03"
+  },
+  {
+    "task": "KB3Z7000B \u2013 P0 175054 \u2013 09487",
+    "warehouse": "Atlanta",
+    "days": 57,
+    "start": "2026-03-04"
+  },
+  {
+    "task": "K2GZ7000C \u2013 P1001549 \u2013 08557",
+    "warehouse": "Charlotte",
+    "days": 57,
+    "start": "2026-03-04"
+  }
+];
+const chrysOldest       = [
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PO# \u2013 PART# 68189105AC",
+    "warehouse": "Charlotte",
+    "days": 311,
+    "start": "2025-06-23"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PART# 68361456AA \u2013 Inv 3211351",
+    "warehouse": "Flowood",
+    "days": 311,
+    "start": "2025-06-23"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PO# \u2013 68461455AA",
+    "warehouse": "Flowood",
+    "days": 308,
+    "start": "2025-06-26"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PO# \u2013 R8310994AA",
+    "warehouse": "Orlando",
+    "days": 304,
+    "start": "2025-06-30"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PO# \u2013 R8310994AA",
+    "warehouse": "Flowood",
+    "days": 297,
+    "start": "2025-07-07"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PO# \u2013 PART# 04578601AA",
+    "warehouse": "Charlotte",
+    "days": 286,
+    "start": "2025-07-18"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PO# \u2013 PART# R8227332AB",
+    "warehouse": "Phoenix",
+    "days": 286,
+    "start": "2025-07-18"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PO# \u2013 PART#R8259591AB",
+    "warehouse": "Orlando",
+    "days": 282,
+    "start": "2025-07-22"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PART# RL367522AA \u2013 Inv 3336236",
+    "warehouse": "Charlotte",
+    "days": 280,
+    "start": "2025-07-24"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 PART# 68251534AE \u2013 Inv 3359363",
+    "warehouse": "Atlanta",
+    "days": 275,
+    "start": "2025-07-29"
+  }
+];
+const fordActions       = [
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "count": 9
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from Dealer",
+    "count": 5
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from Dealer",
+    "count": 5
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from Dealer",
+    "count": 4
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from Dealer",
+    "count": 4
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH PLEASE RESPOND",
+    "count": 3
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH PLEASE RESPOND",
+    "count": 2
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from Dealer",
+    "count": 2
+  },
+  {
+    "wh": "El Paso",
+    "action": "WH P/U from Dealer",
+    "count": 1
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH PLEASE RESPOND",
+    "count": 1
+  }
+];
+const chrysActions      = [
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from dealer",
+    "count": 6
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from dealer",
+    "count": 3
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH Please Respond",
+    "count": 2
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from dealer",
+    "count": 1
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH Please Respond",
+    "count": 1
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH Please Respond",
+    "count": 1
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from dealer",
+    "count": 1
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from dealer",
+    "count": 1
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from dealer",
+    "count": 1
+  }
+];
+const fordTaskDetails   = [
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from Dealer",
+    "task": "LC3Z6006H - P1002552 - 00348 - RIVERSIDE FORD WAREHOUSE - IN01568992",
+    "due": "2026-04-20"
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from Dealer",
+    "task": "GC4Z6007DARM - 08972 - LHM FORD MFD DBA LARRY H MILLER FORD MESA - S39-01473329",
+    "due": "2026-04-24"
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from Dealer",
+    "task": "F81Z6K682BARM - P1002128 - 01440 - FORD COUNTRY - IN01571816",
+    "due": "2026-04-24"
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from Dealer",
+    "task": "LC3Z6006H - 01440 - FORD COUNTRY - IN01567652 - 128115",
+    "due": "2026-04-24"
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from Dealer",
+    "task": "RL3Z7000K - P1002552 - 05291 - HENNESSY FORD LINCOLN ATLANTA - IN01572363",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "task": "FC3Z7000SRM - P0172953 - 04077 - HALEY FORD, INC. - FARMVILLE - IN01572866",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "task": "**NPN** HL3Z6006DARM - P0174618 - 01326 - DEACON JONES FORD LINCOLN - IN01564832",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "task": "FR3Z7L596D - P1001098 - 00978 - CAPITAL FORD - IN01560252",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from Dealer",
+    "task": "BL3Z7000GBRM - P0175040 - 08036 - RUSH TRUCK CENTERS OF NEVADA - IN01563490",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "task": "K2GZ7000C - P1001549 - 08557 - DOUG HENRY FORD OF AYDEN - IN01564872 - 3596796",
+    "due": "2026-05-08"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "task": "8C3Z9A543DRM - P0172909 - 02042 - GATEWAY FORD LINCOLN - IN01569583",
+    "due": "2026-05-08"
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from Dealer",
+    "task": "DA8Z7000CRM - P1002588 - 08211 - ROBINSON BROTHERS FORD - IN01574032",
+    "due": "2026-05-08"
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from Dealer",
+    "task": "HC3Z7000CRM - P1002447 - 01196 - HOLLINGSWORTH RICHARDS FORD - IN01573085",
+    "due": "2026-05-08"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "task": "J1FZ6006B - P1003099 - 06066 - PRIORITY FORD NORFOLK - IN01573653",
+    "due": "2026-05-15"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "task": "CV6Z7000FRM - P0173687 - 02962 - ANDERSON FORD, LLC - IN01573021",
+    "due": "2026-05-15"
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from Dealer",
+    "task": "N1MZ7000B - P1001609 - 06167 - RED RIVER FORD TOYOTA - IN01572657",
+    "due": "2026-05-15"
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from Dealer",
+    "task": "RL3Z7000A - P1000862 - 04823 - AARON FORD OF ESCONDIDO - IN01571475",
+    "due": "2026-05-15"
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from Dealer",
+    "task": "JC3Z7000DRM - P1000830 - 05002 - GRIFFIN FORD-LINCOLN, INC - IN01576052",
+    "due": "2026-05-22"
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from Dealer",
+    "task": "AL8Z7G391DRM - 05677 - FORD OF MURFREESBORO - IN01576674",
+    "due": "2026-05-22"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "task": "LC3Z7000ZRM - P1001142 - 00131 - FREEDOM FORD OF CLAYPOOL HILL - IN01574552",
+    "due": "2026-05-22"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from Dealer",
+    "task": "PC3Z7000K - 05597 - PALM BAY FORD - IN01572414",
+    "due": "2026-05-22"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from Dealer",
+    "task": "PC3Z7000K - 05597 - PALM BAY FORD - IN01573832",
+    "due": "2026-05-22"
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from Dealer",
+    "task": "JC3Z7000ARM - 05534 - FRIENDLY FORD - IN01576115",
+    "due": "2026-05-22"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "task": "BL3Z7000BBRM - 06438 - ROCK HILL FORD - IN01576775",
+    "due": "2026-05-29"
+  },
+  {
+    "wh": "El Paso",
+    "action": "WH P/U from Dealer",
+    "task": "8L3Z6006BARM - 20455 - CASA FORD INC - IN01567675 - AFS 128225",
+    "due": "2026-05-29"
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from Dealer",
+    "task": "3C3Z6C885A - 06531 - LAMARQUE FORD - IN01577416",
+    "due": "2026-05-29"
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from Dealer",
+    "task": "JL3Z7000CRM - 05485 - RACEWAY FORD - IN01576140",
+    "due": "2026-05-29"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from Dealer",
+    "task": "LC3Z7000RRM - 04870 - AL PACKER FORD - IN01575828",
+    "due": "2026-05-29"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from Dealer",
+    "task": "JL3Z7000CRM - 08226 - MULLINAX FORD OF OSCEOLA COUNTY, LLC - IN01577594",
+    "due": "2026-05-29"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from Dealer",
+    "task": "9C3Z7000BRM - 04963 - BRANDON FORD WAREHOUSE - IN01575893",
+    "due": "2026-05-29"
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH PLEASE RESPOND",
+    "task": "KB3Z7000B - P0 175054 - 09487 - SWAINSBORO FORD LINCOLN MERCURY - IN01558617 - 3457665",
+    "due": "2026-04-17"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH PLEASE RESPOND",
+    "task": "DA5Z7000ARM - 06658 - SANDERS FORD - IN01567831 - 3434166",
+    "due": "2026-04-17"
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH PLEASE RESPOND",
+    "task": "LC3Z6006H - P1002552 - 00348 - RIVERSIDE FORD WAREHOUSE - IN01568992",
+    "due": "2026-04-20"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH PLEASE RESPOND",
+    "task": "BL3Z7153B - 06394 - BECK FORD LINCOLN - IN01564378 - CLAIM C-228727867",
+    "due": "2026-04-29"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH PLEASE RESPOND",
+    "task": "RL3Z7000A - 09057 - LUGOFF FORD LINCOLN - IN01570269 - Claim # Smart Courier",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH PLEASE RESPOND",
+    "task": "ML3Z7000E - 04178 - LEADER FORD LLC DBA LAKE KEOWEE FORD - S39-01507397 - AFS 127668",
+    "due": "2026-05-08"
+  }
+];
+const chrysTaskDetails  = [
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - 68498557AB - Inv 4036003 - ABERNATH CJD - CLAIM 525303 (AER)",
+    "due": "2026-04-24"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8599680AB - Inv 3941822 - NORTH KNOXVILLE CD - CLAIM 519178 (AER)",
+    "due": "2026-04-24"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8090720AI - Inv 4087548 - GRIFFIN CDJ - CLAIM 525531 (AER)",
+    "due": "2026-04-24"
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8444771AB - Inv 4080628 - CHAPMAN AUTO CTR - CLAIM 525438 (AER)",
+    "due": "2026-04-24"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8090720AI - Inv 3985816 - TEAM DODGE RAM OF MYRTLE BEACH - CLAIM 460068 (AER)",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER OUTBOUND DAMAGE - 68184732AC - BIG O DODGE - INV 4116977 - CLAIM # AFS 128232",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER OUTBOUND DAMAGE - 68184732AC - BIG O DODGE CJ - Inv 4104470 - MRA-2026-003871CLAIM # AFS 128201",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8149703AJ - Inv 3917885 - LARRY H MILLER PEORIA - CLAIM 530028 (AER)",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8010452AC - Inv 4159495 - UNIVERSITY CDJR - CLAIM 572811 (AER)",
+    "due": "2026-05-15"
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8570759AA - Inv 4136774 - BROWN CDJ - CLAIM 550443 (AER)",
+    "due": "2026-05-15"
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8447797AA - Inv 4092383 - IMPERIAL VALLEY CDJ - CLAIM 530648 (AER)",
+    "due": "2026-05-15"
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8090720AI - Inv 4131315 - COURTESY CDJR - CLAIM 546524 (AER)",
+    "due": "2026-05-15"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - CSPM44A4AA - Inv 4133946 - ARRIGO CDJR OF TAMARAC - CLAIM 571390 (AER)",
+    "due": "2026-05-22"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH Please Respond",
+    "task": "ORLANDO - CHRYSLER SHORTAGE - PO 321012 (Part R8446836AB SN M7051395) & PO 321780 (Part R8210327AG SN M3254643) - CLAIM",
+    "due": "2026-04-03"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH Please Respond",
+    "task": "CHRYSLER OUTBOUND DAMAGE - R8453637AB - Inv 3943903 - MIAMI LAKES DCJ - CLAIM #ADL",
+    "due": "2026-04-10"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH Please Respond",
+    "task": "CHRYSLER INBOUND DAMAGE - PO#1323809 - R8149703AJ - 2 - CLAIM \t572731 - 572732",
+    "due": "2026-05-01"
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH Please Respond",
+    "task": "FLOWOOD - CHRYSLER WRONG PART - PO 1321399 - SHORT R8444771AB - QTY  2 - 12/23/25 - CLAIM 315184",
+    "due": "2026-05-08"
+  }
+];
+const fordTotal         = 70;
+const chrysTotal        = 144;
+const fordGe90          = 2;
+const chrysGe90         = 79;
+const fordBiggestWh     = "Charlotte";
+const fordBiggestN      = 17;
+const chrysBiggestWh    = "Charlotte";
+const chrysBiggestN     = 32;
+const fordOldestDays    = 163;
+const fordOldestWh      = "Ontario";
+const chrysOldestDays   = 311;
+const chrysOldestWh     = "Charlotte";
+// @@DATA_END@@
+// ─── CHART HELPERS ───────────────────────────────────────
+const AGE_COLORS = ["#22c55e","#facc15","#f97316","#ef4444"];
+const AGE_LABELS = ["<30 days","30–59 days","60–89 days","≥90 days"];
 
-// ── KPI Cards ──────────────────────────────────────────────────────────────
-(function buildKPIs() {
-  const fordTotal = Object.values(DATA.ford_data).reduce((s,v) => s + v[3], 0);
-  const chrTotal  = Object.values(DATA.chrysler_data).reduce((s,v) => s + v[3], 0);
-  const cards = [
-    { label: "Ford Open Claims",     value: fordTotal,  cls: "blue",   sub: "100% ≥ 90 days" },
-    { label: "Chrysler Open Claims", value: chrTotal,   cls: "purple", sub: "100% ≥ 90 days" },
-    { label: "Total Open",           value: fordTotal + chrTotal, cls: "red", sub: "Both datasets combined" },
-    { label: "WH Respond Items",     value: DATA.wh_respond.length, cls: "red", sub: "Needs immediate action" },
-  ];
-  const row = document.getElementById('kpi-row');
-  cards.forEach(c => {
-    row.innerHTML += `<div class="kpi">
-      <div class="label">${c.label}</div>
-      <div class="value ${c.cls}">${c.value}</div>
-      <div class="sub">${c.sub}</div>
-    </div>`;
-  });
-})();
-
-// ── Chart helpers ──────────────────────────────────────────────────────────
-const BUCKET_COLORS = ['#22c55e','#f59e0b','#f97316','#ef4444'];
-const BUCKET_LABELS_SHORT = ['< 30d','30–60d','60–90d','≥ 90d'];
-Chart.defaults.color = '#8892a4';
-Chart.defaults.borderColor = '#2a2d3a';
-
-function buildChart(canvasId, warehouses, dataMap, accentColor) {
-  const datasets = DATA.buckets.map((b, i) => ({
-    label: BUCKET_LABELS_SHORT[i],
-    data: warehouses.map(w => dataMap[w][i]),
-    backgroundColor: BUCKET_COLORS[i],
-    borderRadius: 4,
-    borderSkipped: false,
-  }));
-
-  return new Chart(document.getElementById(canvasId), {
+function makeBarChart(id, data, color) {
+  const ctx = document.getElementById(id).getContext('2d');
+  new Chart(ctx, {
     type: 'bar',
-    data: { labels: warehouses, datasets },
+    data: {
+      labels: data.map(d => d.wh),
+      datasets: [{
+        data: data.map(d => d.total),
+        backgroundColor: color + 'cc',
+        borderColor: color,
+        borderWidth: 1.5,
+        borderRadius: 5,
+      }]
+    },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index' },
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { boxWidth: 10, padding: 12, font: { size: 11 } }
-        },
-        tooltip: {
-          callbacks: {
-            footer: (items) => {
-              const total = items.reduce((s, i) => s + i.raw, 0);
-              return `Total: ${total}`;
-            }
-          }
-        }
-      },
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
       scales: {
-        x: {
-          stacked: false,
-          grid: { display: false },
-          ticks: { font: { size: 11 } }
-        },
-        y: {
-          stacked: false,
-          beginAtZero: true,
-          ticks: { stepSize: 5, font: { size: 11 } },
-          title: { display: true, text: 'Open Claims', font: { size: 11 } }
-        }
+        y: { beginAtZero: true, ticks: { precision: 0, font: {size:11} }, grid: { color: '#f1f5f9' } },
+        x: { ticks: { font: {size:11} }, grid: { display: false } }
       }
     }
   });
 }
 
-buildChart('fordChart',     DATA.ford_warehouses,     DATA.ford_data,     '#3b82f6');
-buildChart('chryslerChart', DATA.chrysler_warehouses, DATA.chrysler_data, '#7c3aed');
-
-// ── WH Please Respond Table ────────────────────────────────────────────────
-(function buildTable() {
-  const tbody = document.getElementById('respond-tbody');
-  const sorted = [...DATA.wh_respond].sort((a,b) => b.age_days - a.age_days);
-  sorted.forEach(r => {
-    const isFord = r.dataset === 'Ford Claims';
-    const ageCls = r.age_days >= 200 ? 'age-critical' : 'age-high';
-    tbody.innerHTML += `<tr>
-      <td><span class="tag ${isFord ? 'tag-ford' : 'tag-chrysler'}">${r.dataset}</span></td>
-      <td><strong>${r.warehouse}</strong></td>
-      <td style="max-width:340px;word-break:break-word;font-size:12px;color:#cbd5e1">${r.task}</td>
-      <td><span class="age-chip ${ageCls}">${r.age_days}d</span></td>
-      <td style="color:${r.age_days > 90 ? '#fca5a5' : 'inherit'}">${r.due_date || '—'}</td>
-      <td style="font-size:12px;color:var(--muted)">${r.label}</td>
-    </tr>`;
+function makeStackedChart(id, data) {
+  const ctx = document.getElementById(id).getContext('2d');
+  const keys = ['lt30','d30','d60','ge90'];
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.wh),
+      datasets: keys.map((k, i) => ({
+        label: AGE_LABELS[i],
+        data: data.map(d => d[k]),
+        backgroundColor: AGE_COLORS[i] + 'cc',
+        borderColor: AGE_COLORS[i],
+        borderWidth: 1,
+        borderRadius: i === 3 ? 4 : 0,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { stacked: true, ticks: { font: {size:11} }, grid: { display: false } },
+        y: { stacked: true, beginAtZero: true, ticks: { precision: 0, font: {size:11} }, grid: { color: '#f1f5f9' } }
+      }
+    }
   });
-})();
+}
+
+function daysBadge(d) {
+  const cls = d >= 90 ? 'd90' : d >= 60 ? 'd60' : d >= 30 ? 'd30' : 'd0';
+  return `<span class="days-badge ${cls}">${d}</span>`;
+}
+
+function fillOldest(tbodyId, rows) {
+  const tb = document.getElementById(tbodyId);
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    const parts = r.task.split(' - ');
+    const label = parts.slice(0, 3).join(' – ');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-weight:600">${i+1}</td>
+      <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.task}">${label}</td>
+      <td><span class="wh-tag">${r.warehouse}</span></td>
+      <td style="color:var(--muted)">${r.start}</td>
+      <td>${daysBadge(r.days)}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function fillActions(tbodyId, rows, brandClass, detailData) {
+  const tb = document.getElementById(tbodyId);
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="wh-tag">${r.wh}</span></td>
+      <td>${r.action}</td>
+      <td>
+        <button class="count-btn ${brandClass}" title="Click to see details">
+          ${r.count}
+        </button>
+      </td>`;
+    const btn = tr.querySelector('button');
+    btn.addEventListener('click', function() {
+      showActionDetails(r.wh, r.action, detailData);
+    });
+    tb.appendChild(tr);
+  });
+}
+
+function showActionDetails(wh, action, detailData) {
+  const items = detailData.filter(d => d.wh === wh && d.action === action);
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  document.getElementById('modalTitle').textContent = wh + ' \u2013 ' + action;
+  document.getElementById('modalSub').textContent   = items.length + ' claim' + (items.length !== 1 ? 's' : '');
+
+  const tb = document.getElementById('modalTableBody');
+  tb.innerHTML = '';
+  items.forEach((item, i) => {
+    const tr = document.createElement('tr');
+    let dueCell = item.due || '\u2014';
+    if (item.due) {
+      const d = new Date(item.due);
+      if (!isNaN(d) && d < today) {
+        dueCell = `<span class="due-overdue">${item.due} &#9650;</span>`;
+      }
+    }
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-weight:600;width:28px">${i+1}</td>
+      <td style="word-break:break-word">${item.task}</td>
+      <td style="white-space:nowrap;width:100px">${dueCell}</td>`;
+    tb.appendChild(tr);
+  });
+
+  document.getElementById('actionModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('actionModal').classList.remove('open');
+}
+
+// Close on backdrop click
+document.getElementById('actionModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ─── RENDER ──────────────────────────────────────────────
+document.querySelector('.as-of').textContent = 'As of ' + AS_OF;
+makeBarChart('fordBarChart',  fordSummary,  '#003478');
+makeBarChart('chrysBarChart', chrysSummary, '#8B0000');
+makeStackedChart('fordAgingChart',  fordSummary);
+makeStackedChart('chrysAgingChart', chrysSummary);
+
+fillOldest('fordOldestBody',  fordOldest);
+fillOldest('chrysOldestBody', chrysOldest);
+fillActions('fordActionsBody',  fordActions,  'ford',  fordTaskDetails);
+fillActions('chrysActionsBody', chrysActions, 'chrys', chrysTaskDetails);
 </script>
 </body>
 </html>
