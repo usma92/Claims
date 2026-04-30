@@ -1,0 +1,26 @@
+# config/settings.yaml -- Claims Aging Pipeline
+warehouses:
+  - OKC
+  - Atlanta
+  - Orlando
+  - Ontario
+  - El Paso
+  - Flowood
+  - Phoenix
+  - Charlotte
+
+start_date: "01-01-2024"
+end_date:   "02-01-2026"
+max_labels: 25
+
+input_files:
+  - path: "Ford Claims Planner.xlsx"
+    name: "Ford Claims"
+  - path: "Chrysler Claims Planner.xlsx"
+    name: "Chrysler Claims"
+
+output_excel: "claims_analysis_output.xlsx"
+
+export_excel:     true
+export_charts:    true
+export_dashboard: false
