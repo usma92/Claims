@@ -1,4 +1,3 @@
-# config/settings.yaml -- Claims Aging Pipeline
 warehouses:
   - OKC
   - Atlanta
@@ -11,7 +10,17 @@ warehouses:
 
 start_date: "01-01-2024"
 end_date:   "02-01-2026"
+
+aging_bins:   [-1, 29, 59, 89, .inf]
+aging_labels:
+  - "<30 days"
+  - "30-<60 days"
+  - "60-<90 days"
+  - ">= 90 days"
+
 max_labels: 25
+fig_dpi:    150
+fig_size:   [8, 4.6]
 
 input_files:
   - path: "Ford Claims Planner.xlsx"
@@ -21,6 +30,5 @@ input_files:
 
 output_excel: "claims_analysis_output.xlsx"
 
-export_excel:     true
-export_charts:    true
-export_dashboard: false
+export_excel:  true
+export_charts: true
