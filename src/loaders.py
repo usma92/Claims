@@ -17,11 +17,13 @@ log = logging.getLogger(__name__)
 
 _COLUMN_MAP = {
     "Warehouse":      ["warehouse", "wh", "facility", "site", "location", "bucket name", "bucket"],
-    "Start Date":     ["start date", "open date", "opened date", "date opened", "created date"],
-    "Completed Date": ["completed date", "close date", "closed date", "completion date", "resolved date"],
+    "Start Date":     ["start date", "open date", "opened date", "date opened",
+                       "created date", "create date", "claim open date"],
+    "Completed Date": ["completed date", "close date", "closed date",
+                       "completion date", "resolved date"],
     "Task Name":      ["task name", "task", "claim", "description", "title", "name"],
     "Labels":         ["labels", "label", "tags", "tag", "category", "categories"],
-    "Due Date":       ["due date", "due", "target date", "deadline"],
+    "Due Date":       ["due date", "due", "target date", "task due", "deadline"],
 }
 
 

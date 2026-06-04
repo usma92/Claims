@@ -8,8 +8,8 @@ warehouses:
   - Phoenix
   - Charlotte
 
-start_date: "2026-01-01"
-end_date:   "2026-12-31"
+start_date: "06-01-2025"
+end_date:   "05-01-2026"
 
 aging_bins:   [-1, 29, 59, 89, .inf]
 aging_labels:
@@ -22,9 +22,13 @@ max_labels: 25
 fig_dpi:    150
 fig_size:   [8, 4.6]
 
-inputs:
-  Ford Claims:     "Ford Claims Planner.xlsx"
-  Chrysler Claims: "Chrysler Claims Planner.xlsx"
+input_files:
+  - path: "Ford Claims Planner.xlsx"
+    name: "Ford Claims"
+  - path: "Chrysler Claims Planner.xlsx"
+    name: "Chrysler Claims"
+
+output_excel: "claims_analysis_output.xlsx"
 
 export_excel:  true
 export_charts: true

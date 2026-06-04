@@ -1,17 +1,16 @@
-"""
-src/transforms.py
------------------
-All business logic: filtering, KPI aggregations, aging bucketing, and
-open-task/tag extraction. No I/O here — pure DataFrame → DataFrame.
-"""
+# src/transforms.py — Business logic, KPI calculations, and validation.
+# No I/O here. Notebooks call these functions; they never contain this logic directly.
 import logging
 import re
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
 
 log = logging.getLogger(__name__)
+
+BUCKET_LABELS = ["<30 days", "30-<60 days", "60-<90 days", ">= 90 days"]
+BUCKET_BINS   = [-1, 29, 59, 89, float("inf")]
 
 _WH_ACTION_PATTERN = re.compile(r"\bwh\s*please\s*respo?nd\b", re.IGNORECASE)
 
@@ -21,24 +20,23 @@ _WH_ACTION_PATTERN = re.compile(r"\bwh\s*please\s*respo?nd\b", re.IGNORECASE)
 def filter_by_warehouses_and_dates(
     df: pd.DataFrame,
     warehouses: List[str],
-    start_date: str,
-    end_date: str,
+    start_date: Optional[str],
+    end_date: Optional[str],
 ) -> pd.DataFrame:
     """
-    Filter DataFrame to the specified warehouses and Start Date range.
-
-    Warehouse matching is case-insensitive; output values are normalised
-    to the case provided in the warehouses list.
+    Filter to the specified warehouses and date range (inclusive on both ends).
+    Warehouse matching is case-insensitive; original casing is restored from the
+    warehouses list.
     """
-    wh_lower = {w.lower(): w for w in warehouses}
-    mask_wh  = df["Warehouse"].str.lower().isin(wh_lower)
-    mask_dt  = df["Start Date"].between(
-        pd.Timestamp(start_date), pd.Timestamp(end_date)
-    )
-    df_f = df.loc[mask_wh & mask_dt].copy()
-    df_f["Warehouse"] = df_f["Warehouse"].str.lower().map(wh_lower)
-    log.info("  filter → %d rows", len(df_f))
-    return df_f
+    wanted = {w.strip().lower(): w for w in warehouses}
+    df2 = df[df["Warehouse"].str.lower().isin(wanted.keys())].copy()
+    df2["Warehouse"] = df2["Warehouse"].str.lower().map(wanted)
+
+    if start_date:
+        df2 = df2[df2["Start Date"] >= pd.to_datetime(start_date)]
+    if end_date:
+        df2 = df2[df2["Start Date"] <= pd.to_datetime(end_date)]
+    return df2
 
 
 # ── Closed claims KPIs ─────────────────────────────────────────────────────
@@ -75,20 +73,21 @@ def open_claims_aging_table(
     df: pd.DataFrame,
     dataset_name: str,
     warehouses: List[str],
-    bins: List,
-    labels: List[str],
 ) -> pd.DataFrame:
     """
-    Build open-claims aging distribution table.
-
-    Returns columns: Dataset, Warehouse, Aging Bucket, Count, Percent, CumPercent
+    Build open-claims aging buckets (<30 / 30-<60 / 60-<90 / >=90 days) per warehouse.
+    Returns a full cross-product (warehouse × bucket) with Count, Percent, CumPercent.
     """
     open_df = df.loc[df["Completed Date"].isna()].copy()
-    today   = pd.Timestamp("today").normalize()
-    open_df["AgeDays"] = (today - open_df["Start Date"]).dt.days
+    today = pd.Timestamp.today().normalize()
+    open_df["AgeDays"] = (today - open_df["Start Date"].dt.normalize()).dt.days
 
     open_df["Aging Bucket"] = pd.cut(
-        open_df["AgeDays"], bins=bins, labels=labels, right=True
+        open_df["AgeDays"],
+        bins=BUCKET_BINS,
+        labels=BUCKET_LABELS,
+        include_lowest=True,
+        right=True,
     )
 
     counts = (
@@ -97,13 +96,14 @@ def open_claims_aging_table(
         .reset_index(name="Count")
     )
 
-    # Ensure every warehouse × bucket combination is represented
-    full_idx = pd.MultiIndex.from_product(
-        [warehouses, labels], names=["Warehouse", "Aging Bucket"]
+    # Ensure every warehouse × bucket combination is present
+    active_wh = [w for w in warehouses if w in counts["Warehouse"].unique().tolist()]
+    full_index = pd.MultiIndex.from_product(
+        [active_wh, BUCKET_LABELS], names=["Warehouse", "Aging Bucket"]
     )
     counts = (
         counts.set_index(["Warehouse", "Aging Bucket"])
-        .reindex(full_idx, fill_value=0)
+        .reindex(full_index, fill_value=0)
         .reset_index()
     )
 
@@ -114,28 +114,31 @@ def open_claims_aging_table(
     return counts
 
 
-def build_aging_summary(aging_all: pd.DataFrame, aging_labels: List[str]) -> pd.DataFrame:
+def build_aging_summary(aging_all: pd.DataFrame) -> pd.DataFrame:
     """
-    Pivot aging table into a leadership-ready summary.
-
-    Returns: Dataset, Warehouse, <bucket cols>, Total Open Claims, % >= 90 days
+    Pivot open-claims aging into a leadership-friendly summary table
+    (Dataset × Warehouse rows, bucket columns, Total Open Claims, % >= 90 days).
     """
-    summary = (
+    aging_summary = (
         aging_all
         .pivot_table(
             index=["Dataset", "Warehouse"],
             columns="Aging Bucket",
             values="Count",
             aggfunc="sum",
+            fill_value=0,
         )
-        .reindex(columns=aging_labels, fill_value=0)
+        .reindex(columns=BUCKET_LABELS, fill_value=0)
         .reset_index()
     )
-    summary["Total Open Claims"] = summary[aging_labels].sum(axis=1)
-    summary["% >= 90 days"] = (
-        summary[">= 90 days"] / summary["Total Open Claims"].replace(0, np.nan)
-    ).fillna(0)
-    return summary
+    aging_summary.columns.name = None
+    aging_summary["Total Open Claims"] = aging_summary[BUCKET_LABELS].sum(axis=1)
+    aging_summary["% >= 90 days"] = np.where(
+        aging_summary["Total Open Claims"] > 0,
+        aging_summary[">= 90 days"] / aging_summary["Total Open Claims"],
+        np.nan,
+    )
+    return aging_summary
 
 
 # ── Open tasks ─────────────────────────────────────────────────────────────
@@ -148,43 +151,45 @@ def _extract_wh_actions(labels_value: Optional[str]) -> List[str]:
     return [p.strip() for p in parts if p.strip().upper().startswith("WH")]
 
 
-def build_open_tasks(df: pd.DataFrame, dataset_name: str) -> Optional[pd.DataFrame]:
+def build_open_tasks(
+    df_std_f: pd.DataFrame,
+    dataset_name: str,
+) -> pd.DataFrame:
     """
-    Extract open claims with warehouse action labels (exploded to one row per action).
-
-    Returns columns: Dataset, Warehouse, Task Name, Action Required, Due Date
-    Returns None if no matching rows found.
+    Explode WH-action labels for open claims into one row per action.
+    Returns columns: Dataset, Warehouse, Task Name, Action Required, Due Date.
     """
-    if "Labels" not in df.columns:
-        return None
+    _empty = pd.DataFrame(
+        columns=["Dataset", "Warehouse", "Task Name", "Action Required", "Due Date"]
+    )
+    if "Labels" not in df_std_f.columns:
+        return _empty
 
-    open_df = df.loc[df["Completed Date"].isna()].copy()
+    open_df = df_std_f.loc[df_std_f["Completed Date"].isna()].copy()
     open_df["ActionList"] = open_df["Labels"].apply(_extract_wh_actions)
-    tasks = open_df.loc[open_df["ActionList"].map(len) > 0].copy()
+    open_df = open_df[open_df["ActionList"].map(len) > 0].copy()
+    if open_df.empty:
+        return _empty
 
-    if tasks.empty:
-        return None
-
-    tasks = tasks.explode("ActionList").rename(columns={"ActionList": "Action Required"})
-    keep  = [c for c in ["Dataset", "Warehouse", "Task Name", "Action Required", "Due Date"] if c in tasks.columns]
-    return tasks[keep].reset_index(drop=True)
+    open_df = open_df.explode("ActionList")
+    open_df.rename(columns={"ActionList": "Action Required"}, inplace=True)
+    open_df["Dataset"] = dataset_name
+    return open_df[["Dataset", "Warehouse", "Task Name", "Action Required", "Due Date"]]
 
 
 # ── WH tag scan ────────────────────────────────────────────────────────────
 
 def scan_wh_tags(df: pd.DataFrame, dataset_name: str) -> Optional[pd.DataFrame]:
     """
-    Scan Labels column for 'WH Please Respond' pattern (regex, full dataset).
-
+    Scan Labels column for 'WH Please Respond' pattern (full dataset, unfiltered).
     Returns: Dataset, Warehouse, Task Name — deduplicated by Task Name.
     Returns None if Labels column absent or no matches.
     """
     if "Labels" not in df.columns:
         return None
 
-    df_norm = df.copy()
-    mask    = df_norm["Labels"].str.contains(_WH_ACTION_PATTERN, na=False)
-    hits    = df_norm.loc[mask, [c for c in ["Warehouse", "Task Name", "Labels"] if c in df_norm.columns]].copy()
+    mask = df["Labels"].str.contains(_WH_ACTION_PATTERN, na=False)
+    hits = df.loc[mask, [c for c in ["Warehouse", "Task Name", "Labels"] if c in df.columns]].copy()
 
     if hits.empty:
         return None
