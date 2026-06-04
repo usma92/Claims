@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(C:/Users/dbalan/Desktop/Python/Github/2. Claims/.venv/Scripts/pip.exe freeze *)",
+      "Bash(/c/Users/dbalan/Desktop/Python/Github/2. Claims/.venv/Scripts/python.exe *)",
+      "Bash(python update_dashboard.py)",
+      "Bash(\"/c/Users/dbalan/Desktop/Python/Github/2. Claims/.venv/Scripts/python.exe\" -m jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=120 \"Claims_Aging_Pareto_v3.2_commented.ipynb\")"
+    ]
+  }
+}

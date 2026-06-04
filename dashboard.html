@@ -253,7 +253,7 @@
     <h1>Claims Aging Dashboard</h1>
     <div class="subtitle">Open claim aging &amp; warehouse performance</div>
   </div>
-  <div class="as-of">As of April 14, 2026</div>
+  <div class="as-of" id="asOfDate"></div>
 </header>
 
 <!-- ═══════════════════════ FORD ═══════════════════════ -->
@@ -266,23 +266,23 @@
   <div class="stat-row">
     <div class="stat-card">
       <div class="label">Total Open</div>
-      <div class="value">55</div>
+      <div class="value" id="fordTotalVal"></div>
       <div class="sub">across 8 warehouses</div>
     </div>
     <div class="stat-card">
       <div class="label">Largest WH</div>
-      <div class="value">Charlotte</div>
-      <div class="sub">16 open claims</div>
+      <div class="value" id="fordBiggestWhVal"></div>
+      <div class="sub" id="fordBiggestNSub"></div>
     </div>
     <div class="stat-card caution">
       <div class="label">60–89 Days</div>
-      <div class="value">2</div>
+      <div class="value" id="ford6089Val"></div>
       <div class="sub">need attention</div>
     </div>
     <div class="stat-card">
       <div class="label">Oldest Claim</div>
-      <div class="value">77</div>
-      <div class="sub">days open (Charlotte)</div>
+      <div class="value" id="fordOldestDaysVal"></div>
+      <div class="sub" id="fordOldestWhSub"></div>
     </div>
   </div>
 
@@ -341,23 +341,23 @@
   <div class="stat-row">
     <div class="stat-card">
       <div class="label">Total Open</div>
-      <div class="value">64</div>
+      <div class="value" id="chrysTotalVal"></div>
       <div class="sub">across 8 warehouses</div>
     </div>
     <div class="stat-card">
       <div class="label">Largest WH</div>
-      <div class="value">Charlotte</div>
-      <div class="sub">15 open claims</div>
+      <div class="value" id="chrysBiggestWhVal"></div>
+      <div class="sub" id="chrysBiggestNSub"></div>
     </div>
     <div class="stat-card warn">
       <div class="label">≥90 Days</div>
-      <div class="value">9</div>
+      <div class="value" id="chrysGe90Val"></div>
       <div class="sub">critical — need action</div>
     </div>
     <div class="stat-card warn">
       <div class="label">Oldest Claim</div>
-      <div class="value">98</div>
-      <div class="sub">days open (Charlotte)</div>
+      <div class="value" id="chrysOldestDaysVal"></div>
+      <div class="sub" id="chrysOldestWhSub"></div>
     </div>
   </div>
 
@@ -425,69 +425,69 @@
 
 <script>
 // @@DATA_START@@
-const AS_OF         = "April 14, 2026";
+const AS_OF         = "June 04, 2026";
 const fordSummary   = [
   {
-    "wh": "Charlotte",
+    "wh": "Atlanta",
     "lt30": 12,
-    "d30": 3,
-    "d60": 1,
-    "ge90": 0,
-    "total": 16,
-    "pct90": 0.0
-  },
-  {
-    "wh": "Phoenix",
-    "lt30": 6,
-    "d30": 3,
+    "d30": 6,
     "d60": 0,
     "ge90": 0,
-    "total": 9,
+    "total": 18,
     "pct90": 0.0
   },
   {
     "wh": "Orlando",
-    "lt30": 6,
-    "d30": 3,
+    "lt30": 2,
+    "d30": 11,
     "d60": 0,
+    "ge90": 1,
+    "total": 14,
+    "pct90": 7.1
+  },
+  {
+    "wh": "Phoenix",
+    "lt30": 5,
+    "d30": 4,
+    "d60": 2,
     "ge90": 0,
-    "total": 9,
+    "total": 11,
     "pct90": 0.0
   },
   {
-    "wh": "Ontario",
+    "wh": "Charlotte",
     "lt30": 5,
-    "d30": 3,
+    "d30": 5,
+    "d60": 1,
+    "ge90": 0,
+    "total": 11,
+    "pct90": 0.0
+  },
+  {
+    "wh": "Flowood",
+    "lt30": 4,
+    "d30": 4,
     "d60": 0,
     "ge90": 0,
     "total": 8,
     "pct90": 0.0
   },
   {
-    "wh": "Atlanta",
-    "lt30": 4,
-    "d30": 1,
-    "d60": 1,
-    "ge90": 0,
-    "total": 6,
-    "pct90": 0.0
-  },
-  {
-    "wh": "Flowood",
-    "lt30": 2,
-    "d30": 2,
+    "wh": "Ontario",
+    "lt30": 3,
+    "d30": 3,
     "d60": 0,
-    "ge90": 0,
-    "total": 4,
-    "pct90": 0.0
+    "ge90": 1,
+    "total": 7,
+    "pct90": 14.3
   },
   {
     "wh": "El Paso",
-    "lt30": 2,
+    "lt30": 0,
     "d30": 0,
-    "d60": 0,
+    "d60": 1,
     "ge90": 0,
-    "total": 2,
+    "total": 1,
     "pct90": 0.0
   },
   {
@@ -503,533 +503,555 @@ const fordSummary   = [
 const chrysSummary  = [
   {
     "wh": "Charlotte",
-    "lt30": 6,
-    "d30": 7,
-    "d60": 0,
-    "ge90": 2,
-    "total": 15,
-    "pct90": 13.3
+    "lt30": 5,
+    "d30": 8,
+    "d60": 5,
+    "ge90": 5,
+    "total": 23,
+    "pct90": 21.7
   },
   {
     "wh": "Atlanta",
-    "lt30": 2,
+    "lt30": 7,
     "d30": 2,
-    "d60": 4,
-    "ge90": 1,
-    "total": 9,
-    "pct90": 11.1
-  },
-  {
-    "wh": "El Paso",
-    "lt30": 4,
-    "d30": 3,
     "d60": 2,
-    "ge90": 0,
-    "total": 9,
-    "pct90": 0.0
+    "ge90": 5,
+    "total": 16,
+    "pct90": 31.2
   },
   {
     "wh": "Flowood",
-    "lt30": 4,
-    "d30": 0,
-    "d60": 1,
-    "ge90": 3,
-    "total": 8,
-    "pct90": 37.5
-  },
-  {
-    "wh": "Orlando",
-    "lt30": 3,
-    "d30": 3,
-    "d60": 2,
-    "ge90": 0,
-    "total": 8,
-    "pct90": 0.0
-  },
-  {
-    "wh": "Phoenix",
-    "lt30": 1,
+    "lt30": 6,
     "d30": 4,
-    "d60": 1,
-    "ge90": 0,
-    "total": 6,
-    "pct90": 0.0
+    "d60": 2,
+    "ge90": 2,
+    "total": 14,
+    "pct90": 14.3
   },
   {
     "wh": "Ontario",
-    "lt30": 0,
+    "lt30": 4,
+    "d30": 4,
+    "d60": 1,
+    "ge90": 4,
+    "total": 13,
+    "pct90": 30.8
+  },
+  {
+    "wh": "El Paso",
+    "lt30": 3,
     "d30": 3,
-    "d60": 0,
+    "d60": 1,
+    "ge90": 4,
+    "total": 11,
+    "pct90": 36.4
+  },
+  {
+    "wh": "Phoenix",
+    "lt30": 2,
+    "d30": 4,
+    "d60": 1,
+    "ge90": 4,
+    "total": 11,
+    "pct90": 36.4
+  },
+  {
+    "wh": "Orlando",
+    "lt30": 2,
+    "d30": 4,
+    "d60": 2,
     "ge90": 2,
-    "total": 5,
-    "pct90": 40.0
+    "total": 10,
+    "pct90": 20.0
   },
   {
     "wh": "OKC",
-    "lt30": 1,
-    "d30": 2,
+    "lt30": 2,
+    "d30": 0,
     "d60": 0,
     "ge90": 1,
-    "total": 4,
-    "pct90": 25.0
+    "total": 3,
+    "pct90": 33.3
   }
 ];
 const fordOldest    = [
   {
-    "task": "ML3Z7000E \u2013 04178 \u2013 LEADER FORD LLC DBA LAKE KEOWEE FORD",
-    "warehouse": "Charlotte",
-    "days": 77,
-    "start": "2026-01-27"
-  },
-  {
-    "task": "FR3Z7L596A \u2013 05936 \u2013 MCCLARY FORD LINCOLN MERCURY",
-    "warehouse": "Atlanta",
-    "days": 60,
-    "start": "2026-02-13"
-  },
-  {
-    "task": "LC3Z6006B \u2013 05162 \u2013 RUSH TRUCK CENTER WHITTIER",
-    "warehouse": "Ontario",
-    "days": 57,
-    "start": "2026-02-16"
-  },
-  {
-    "task": "GF1Z6006DRM- 09681- DAVID WILSON FORD - CLAIM 127857",
-    "warehouse": "Charlotte",
-    "days": 57,
-    "start": "2026-02-16"
-  },
-  {
     "task": "LC3Z6006B \u2013 05162 \u2013 RUSH TRUCK WHITTIER",
     "warehouse": "Ontario",
-    "days": 56,
+    "days": 107,
     "start": "2026-02-17"
-  },
-  {
-    "task": "L1MZ7000G \u2013 00905 \u2013 PARKWAY FORD, INC.",
-    "warehouse": "Charlotte",
-    "days": 50,
-    "start": "2026-02-23"
-  },
-  {
-    "task": "AL3Z6006DARM \u2013 PO-0172184 \u2013 01699",
-    "warehouse": "Flowood",
-    "days": 49,
-    "start": "2026-02-24"
-  },
-  {
-    "task": "JL3Z7000CRM \u2013 P1000834 \u2013 01440",
-    "warehouse": "Phoenix",
-    "days": 49,
-    "start": "2026-02-24"
-  },
-  {
-    "task": "LC3Z6006B \u2013 P1000859 \u2013 00869",
-    "warehouse": "Ontario",
-    "days": 49,
-    "start": "2026-02-24"
   },
   {
     "task": "DR3Z7L596A \u2013 04908 \u2013 SAWGRASS FORD",
     "warehouse": "Orlando",
-    "days": 43,
+    "days": 94,
     "start": "2026-03-02"
+  },
+  {
+    "task": "LC3Z6006H \u2013 01440 \u2013 FORD COUNTRY",
+    "warehouse": "Phoenix",
+    "days": 72,
+    "start": "2026-03-24"
+  },
+  {
+    "task": "F81Z6K682BARM \u2013 P1002128 \u2013 01440",
+    "warehouse": "Phoenix",
+    "days": 66,
+    "start": "2026-03-30"
+  },
+  {
+    "task": "FR3Z7L596D \u2013 P1001253 \u2013 00978",
+    "warehouse": "Charlotte",
+    "days": 64,
+    "start": "2026-04-01"
+  },
+  {
+    "task": "8L3Z6006BARM \u2013 20455 \u2013 CASA FORD INC",
+    "warehouse": "El Paso",
+    "days": 62,
+    "start": "2026-04-03"
+  },
+  {
+    "task": "5C3Z6K682CCRM \u2013 01167 \u2013 SARASOTA FORD",
+    "warehouse": "Orlando",
+    "days": 58,
+    "start": "2026-04-07"
+  },
+  {
+    "task": "**NPN** HL3Z6006DARM \u2013 P0174618 \u2013 01326",
+    "warehouse": "Charlotte",
+    "days": 58,
+    "start": "2026-04-07"
+  },
+  {
+    "task": "**NPN**  LC2Z7000A \u2013 P1002553 \u2013 09951",
+    "warehouse": "Orlando",
+    "days": 58,
+    "start": "2026-04-07"
+  },
+  {
+    "task": "BL3Z7000GBRM \u2013 P0175040 \u2013 08036",
+    "warehouse": "Phoenix",
+    "days": 57,
+    "start": "2026-04-08"
   }
 ];
 const chrysOldest   = [
   {
     "task": "CHRYSLER DAMAGE \u2013 R8450915AA \u2013 Inv 3812564",
     "warehouse": "Charlotte",
-    "days": 98,
+    "days": 149,
     "start": "2026-01-06"
   },
   {
     "task": "CHRYSLER VISIBLE DAMAGE -R8453637AB \u2013 SERIAL# M3251495 \u2013 PO 1320103",
     "warehouse": "Atlanta",
-    "days": 98,
+    "days": 149,
     "start": "2026-01-06"
   },
   {
     "task": "CHRYSLER DAMAGE \u2013 R8156209AH \u2013 Inv 3759140",
     "warehouse": "OKC",
-    "days": 96,
-    "start": "2026-01-08"
-  },
-  {
-    "task": "CHRYSLER DAMAGE \u2013 R8071553AA \u2013 Inv 3687799",
-    "warehouse": "Flowood",
-    "days": 96,
+    "days": 147,
     "start": "2026-01-08"
   },
   {
     "task": "CHRYSLER DAMAGE \u2013 R8149703AJ \u2013 Inv 3778437",
     "warehouse": "Flowood",
-    "days": 96,
-    "start": "2026-01-08"
-  },
-  {
-    "task": "CHRYSLER DAMAGE \u2013 R8149703AJ \u2013 Inv 3794864",
-    "warehouse": "Ontario",
-    "days": 96,
+    "days": 147,
     "start": "2026-01-08"
   },
   {
     "task": "CHRYSLER DAMAGE \u2013 R8447797AA \u2013 Inv 3482937",
     "warehouse": "Charlotte",
-    "days": 96,
+    "days": 147,
+    "start": "2026-01-08"
+  },
+  {
+    "task": "CHRYSLER DAMAGE \u2013 R8149703AJ \u2013 Inv 3794864",
+    "warehouse": "Ontario",
+    "days": 147,
     "start": "2026-01-08"
   },
   {
     "task": "CHRYSLER OUTBOUND DAMAGE  \u2013 Inv 3828456 \u2013 R8453637AB",
     "warehouse": "Flowood",
-    "days": 95,
+    "days": 146,
     "start": "2026-01-09"
   },
   {
     "task": "CHRYSLER DAMAGE  \u2013 R8225256AA \u2013 Inv 3733721",
     "warehouse": "Ontario",
-    "days": 92,
+    "days": 143,
     "start": "2026-01-12"
   },
   {
     "task": "CHRYSLER DAMAGE \u2013 R8411264AA \u2013 Inv 3875997",
     "warehouse": "Orlando",
-    "days": 81,
+    "days": 132,
     "start": "2026-01-23"
+  },
+  {
+    "task": "CHRYSLER VISIBLE DAMAGE -R8453637AB - SERIAL#M3253262",
+    "warehouse": "Atlanta",
+    "days": 129,
+    "start": "2026-01-26"
   }
 ];
 const fordActions       = [
   {
-    "wh": "Charlotte",
+    "wh": "Atlanta",
     "action": "WH P/U from Dealer",
     "count": 8
   },
   {
-    "wh": "Charlotte",
+    "wh": "Atlanta",
     "action": "WH PLEASE RESPOND",
-    "count": 4
+    "count": 3
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from Dealer",
+    "count": 2
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from Dealer",
+    "count": 2
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from Dealer",
+    "count": 2
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH PLEASE RESPOND",
+    "count": 2
   },
   {
     "wh": "Phoenix",
     "action": "WH P/U from Dealer",
-    "count": 4
-  },
-  {
-    "wh": "Orlando",
-    "action": "WH P/U from Dealer",
-    "count": 4
-  },
-  {
-    "wh": "Atlanta",
-    "action": "WH P/U from Dealer",
-    "count": 3
-  },
-  {
-    "wh": "Ontario",
-    "action": "WH P/U from Dealer",
-    "count": 3
+    "count": 2
   },
   {
     "wh": "Ontario",
     "action": "WH PLEASE RESPOND",
+    "count": 1
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from Dealer",
     "count": 1
   }
 ];
 const chrysActions      = [
   {
-    "wh": "Charlotte",
-    "action": "WH P/U from dealer",
-    "count": 7
-  },
-  {
     "wh": "Flowood",
     "action": "WH P/U from dealer",
-    "count": 2
+    "count": 4
   },
   {
-    "wh": "Phoenix",
+    "wh": "Charlotte",
     "action": "WH P/U from dealer",
-    "count": 2
+    "count": 3
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from dealer",
+    "count": 3
   },
   {
     "wh": "Atlanta",
     "action": "WH P/U from dealer",
-    "count": 1
+    "count": 2
   },
   {
-    "wh": "Charlotte",
-    "action": "WH Please Respond",
+    "wh": "El Paso",
+    "action": "WH P/U from dealer",
     "count": 1
   },
   {
     "wh": "OKC",
     "action": "WH P/U from dealer",
+    "count": 1
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from dealer",
+    "count": 1
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH Please Respond",
     "count": 1
   }
 ];
 const fordTaskDetails   = [
   {
-    "wh": "Orlando",
-    "action": "WH P/U from Dealer",
-    "task": "BL3Z7153B - 06394 - BECK FORD LINCOLN - IN01564378 - CLAIM C-228727867",
-    "due": "2026-03-27"
-  },
-  {
     "wh": "Ontario",
     "action": "WH P/U from Dealer",
-    "task": "FL3Z7902AARM - PO 174471 - 00514 - FORD OF UPLAND - IN01566622",
-    "due": "2026-04-03"
+    "task": "BL3Z7000FBRM - 05458 - EL CAJON FORD - IN01581892",
+    "due": "2026-07-03"
+  },
+  {
+    "wh": "Phoenix",
+    "action": "WH P/U from Dealer",
+    "task": "LC3Z6006H - 01440 - FORD COUNTRY - IN01582468",
+    "due": "2026-06-26"
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH PLEASE RESPOND",
+    "task": "PART # k2gz7000RRM  - 06801 - whf2",
+    "due": ""
   },
   {
     "wh": "Charlotte",
     "action": "WH P/U from Dealer",
-    "task": "K2GZ7000C - P1001365 - 08557 - DOUG HENRY FORD OF AYDEN - IN01564872",
-    "due": "2026-04-06"
+    "task": "GF1Z6006CRM - 06066 - PRIORITY FORD NORFOLK - IN01579902",
+    "due": "2026-06-26"
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from Dealer",
+    "task": "K2GZ7000VRM - 05978 - TROTTER FORD SALES - IN01582979",
+    "due": "2026-06-26"
   },
   {
     "wh": "Atlanta",
     "action": "WH P/U from Dealer",
-    "task": "LC3Z6006H - P1002552 - 00348 - RIVERSIDE FORD WAREHOUSE - IN01568992",
-    "due": "2026-04-17"
-  },
-  {
-    "wh": "Ontario",
-    "action": "WH P/U from Dealer",
-    "task": "L1MZ7000U - 06560 - SUNRISE FORD OF FONTANA - IN01569832",
-    "due": "2026-04-17"
-  },
-  {
-    "wh": "Ontario",
-    "action": "WH P/U from Dealer",
-    "task": "DV6Z7000ERM - 08700 - TUTTLE CLICKS CAPISTRANO FORD - IN01569875",
-    "due": "2026-04-17"
+    "task": "LC3Z7000KB - 03944 - SPEEDWAY FORD SALES INC - IN01581665",
+    "due": "2026-06-26"
   },
   {
     "wh": "Orlando",
     "action": "WH P/U from Dealer",
-    "task": "LC3Z7000YRM - 03898 - DELAND FORD AF MOTORS L.L.C. - IN01569695",
-    "due": "2026-04-17"
-  },
-  {
-    "wh": "Orlando",
-    "action": "WH P/U from Dealer",
-    "task": "LR3Z6006B - 03073 - MULLINAX FORD OF CENTRAL FLA - IN01554568",
-    "due": "2026-04-17"
+    "task": "3C3Z6C885A - P1005106 - 06394 - BECK FORD LINCOLN - IN01581899",
+    "due": "2026-06-26"
   },
   {
     "wh": "Atlanta",
     "action": "WH P/U from Dealer",
-    "task": "LC3Z6006H - 00348 - RIVERSIDE FORD INC. - MACON - IN01569434",
-    "due": "2026-04-24"
+    "task": "BR3Z6006BRM - 03365 - TOWN & COUNTRY FORD BESSEMER - IN01581371 - 128547",
+    "due": "2026-06-26"
   },
   {
     "wh": "Charlotte",
     "action": "WH P/U from Dealer",
-    "task": "4C3Z9E527ARM - P1000769 - 05137 - APPLE FORD OF LYNCHBURG, INC - IN01571315",
-    "due": "2026-04-24"
-  },
-  {
-    "wh": "Charlotte",
-    "action": "WH P/U from Dealer",
-    "task": "HC3Z6006FARM - P0174759 - 05613 - GARY YEOMANS FORD KNOXVILLE - IN01570516",
-    "due": "2026-04-24"
-  },
-  {
-    "wh": "Orlando",
-    "action": "WH P/U from Dealer",
-    "task": "KU1Z6006BRM - 08172 - RUSH TRUCK CENTERS FORD - IN01569710",
-    "due": "2026-04-24"
+    "task": "BL3Z7000HBRM - 00996 - CAPITAL FORD LINC. - ROCY MOUNT - IN01580123",
+    "due": "2026-06-19"
   },
   {
     "wh": "Phoenix",
     "action": "WH P/U from Dealer",
-    "task": "GC4Z6007DARM - 08972 - LHM FORD MFD DBA LARRY H MILLER FORD MESA - S39-01473329",
-    "due": "2026-04-24"
-  },
-  {
-    "wh": "Phoenix",
-    "action": "WH P/U from Dealer",
-    "task": "F81Z6K682BARM - 01440 - FORD COUNTRY - IN01571816",
-    "due": "2026-04-24"
-  },
-  {
-    "wh": "Phoenix",
-    "action": "WH P/U from Dealer",
-    "task": "LC3Z6006H - 01440 - FORD COUNTRY - IN01567652 - 128115",
-    "due": "2026-04-24"
+    "task": "5C3Z9A543ARM - 20443 - ALEXANDER FORD - IN01579693",
+    "due": "2026-06-15"
   },
   {
     "wh": "Atlanta",
     "action": "WH P/U from Dealer",
-    "task": "RL3Z7000K - 05291 - HENNESSY FORD LINCOLN ATLANTA - IN01572363",
-    "due": "2026-05-01"
+    "task": "JC3Z7000ARM - P1004476 - 00264 - LEGACY FORD & MERCURY - IN01579430",
+    "due": "2026-06-15"
   },
   {
-    "wh": "Charlotte",
+    "wh": "Atlanta",
     "action": "WH P/U from Dealer",
-    "task": "FR3Z7L596D - P1001098 - 00978 - CAPITAL FORD - IN01560252",
-    "due": "2026-05-01"
+    "task": "LC3Z6006H - P1005487 - 05729 - TWO RIVERS FORD INC - IN01579893",
+    "due": "2026-06-15"
   },
   {
-    "wh": "Charlotte",
+    "wh": "Flowood",
     "action": "WH P/U from Dealer",
-    "task": "FC3Z7000SRM - 04077 - HALEY FORD, INC. - FARMVILLE - IN01572866",
-    "due": "2026-05-01"
+    "task": "JL3Z7000ERM - 08173 - RED RIVER FORD - IN01576325",
+    "due": "2026-06-15"
   },
   {
-    "wh": "Charlotte",
+    "wh": "Atlanta",
     "action": "WH P/U from Dealer",
-    "task": "**NPN** HL3Z6006DARM - P0174618 - 01326 - DEACON JONES FORD LINCOLN - IN01564832",
-    "due": "2026-05-01"
+    "task": "JL1Z7000BRM - P1004192 - 05616 - JENKINS & WYNNE FORD L/M - IN01579275",
+    "due": "2026-06-12"
   },
   {
-    "wh": "Phoenix",
+    "wh": "Atlanta",
     "action": "WH P/U from Dealer",
-    "task": "BL3Z7000GBRM - 08036 - RUSH TRUCK CENTERS OF NEVADA - IN01563490",
-    "due": "2026-05-01"
+    "task": "FC3Z7000SRM - P0173688 - 09402 - RUSSELL BARNETT FORD OF TULLAHOMA - IN01577320",
+    "due": "2026-05-29"
   },
   {
-    "wh": "Charlotte",
-    "action": "WH P/U from Dealer",
-    "task": "FL3Z6006DARM - 01046 - CLONINGER FORD OF HICKORY - IN01566394",
-    "due": "2026-05-08"
+    "wh": "Orlando",
+    "action": "WH PLEASE RESPOND",
+    "task": "ORLANDO - MIS-SHIPMENT- PO# 1325787 - INV - PART# LC3Z6006G - QTY  1 - DATE 4.27.2026",
+    "due": "2026-04-30"
   },
   {
-    "wh": "Charlotte",
+    "wh": "Atlanta",
+    "action": "WH PLEASE RESPOND",
+    "task": "JC3Z7000DRM - P1000830 - 05002 - GRIFFIN FORD-LINCOLN, INC - IN01576052",
+    "due": "2026-05-22"
+  },
+  {
+    "wh": "Atlanta",
     "action": "WH P/U from Dealer",
-    "task": "8C3Z9A543DRM - 02042 - GATEWAY FORD LINCOLN - IN01569583",
-    "due": "2026-05-08"
+    "task": "JC3Z7000DRM - P1000830 - 05002 - GRIFFIN FORD-LINCOLN, INC - IN01576052",
+    "due": "2026-05-22"
   },
   {
     "wh": "Ontario",
     "action": "WH PLEASE RESPOND",
-    "task": "FL3Z7902AARM - PO 174471 - 00514 - FORD OF UPLAND - IN01566622",
-    "due": "2026-04-03"
+    "task": "RL3Z7000A - P1000862 - 04823 - AARON FORD OF ESCONDIDO - IN01571475",
+    "due": "2026-05-15"
   },
   {
-    "wh": "Charlotte",
-    "action": "WH PLEASE RESPOND",
-    "task": "K2GZ7000C - P1001365 - 08557 - DOUG HENRY FORD OF AYDEN - IN01564872",
-    "due": "2026-04-06"
+    "wh": "Ontario",
+    "action": "WH P/U from Dealer",
+    "task": "RL3Z7000A - P1000862 - 04823 - AARON FORD OF ESCONDIDO - IN01571475",
+    "due": "2026-05-15"
   },
   {
-    "wh": "Charlotte",
+    "wh": "Atlanta",
     "action": "WH PLEASE RESPOND",
-    "task": "L1MZ7000G - 00905 - PARKWAY FORD, INC. - IN01559935 - Claim # AFS 127856",
-    "due": "2026-04-17"
+    "task": "RL3Z7000K - P1002552 - 05291 - HENNESSY FORD LINCOLN ATLANTA - IN01572363",
+    "due": "2026-05-01"
   },
   {
-    "wh": "Charlotte",
-    "action": "WH PLEASE RESPOND",
-    "task": "DA5Z7000ARM - 06658 - SANDERS FORD - IN01567831 - 3434166",
-    "due": "2026-04-17"
+    "wh": "Atlanta",
+    "action": "WH P/U from Dealer",
+    "task": "RL3Z7000K - P1002552 - 05291 - HENNESSY FORD LINCOLN ATLANTA - IN01572363",
+    "due": "2026-05-01"
   },
   {
-    "wh": "Charlotte",
+    "wh": "Orlando",
     "action": "WH PLEASE RESPOND",
-    "task": "GF1Z6006DRM- 09681- DAVID WILSON FORD - CLAIM 127857",
-    "due": "2026-04-24"
+    "task": "**NPN**  LC2Z7000A - P1002553 - 09951 - PACKER NORRIS PARTS - IN01568310",
+    "due": "2026-05-01"
   }
 ];
 const chrysTaskDetails  = [
   {
-    "wh": "Phoenix",
+    "wh": "Flowood",
     "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - 05162119BC - Inv 3992011 - COURTESY CDJR - CLAIM 460768(AER)",
-    "due": "2026-03-27"
+    "task": "CHRYSLER DAMAGE - R8570759AA - Inv 4314834  - RALPH SELLERS CDJ - CLAIM 642341 (AER)",
+    "due": "2026-06-19"
   },
   {
     "wh": "Charlotte",
     "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - R8090720AI - Inv 3985816 - TEAM DODGE RAM OF MYRTLE BEACH - CLAIM 460068 (AER)",
-    "due": "2026-04-03"
+    "task": "CHRYSLER DAMAGE - R8051224AG - Inv 4296338  - FLOW CDJR - CLAIM 647123 (AER)",
+    "due": "2026-06-19"
   },
   {
-    "wh": "Charlotte",
+    "wh": "El Paso",
     "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - R85970759AA - Inv 4000359 - NORTH KNOXVILLE CD - CLAIM 455981(AER)",
-    "due": "2026-04-03"
-  },
-  {
-    "wh": "Charlotte",
-    "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - 68409309AA - Inv 4020734 - HARPER JRCD - CLAIM 481780(AER)",
-    "due": "2026-04-03"
+    "task": "CHRYSLER DAMAGE - 68640400AA - Inv 4304425  - VIVA DCJ - CLAIM 648661 (AER)",
+    "due": "2026-06-19"
   },
   {
     "wh": "Flowood",
     "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - R8409357AA - Inv 3878662 - RED RIVER DCJ - CLAIM 389877 (AER)",
-    "due": "2026-04-13"
+    "task": "CHRYSLER DAMAGE - 68449198AA - Inv 4265717  - LANDERS CDJR - CLAIM 642621 (AER)",
+    "due": "2026-06-26"
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8149703AJ - Inv 4272315  - HADDAD DODGE - CLAIM 629182 (AER)",
+    "due": "2026-06-19"
   },
   {
     "wh": "Atlanta",
     "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - R8259595AB - Inv 3840191 - GUPTON MOTORS - CLAIM 362161 (AER)",
-    "due": "2026-04-16"
+    "task": "CHRYSLER OUTBOUND DAMAGE - R8149704AJ - Inv 4311443 - MT JULIET CDJ - CLAIM # AFS 128571",
+    "due": "2026-06-26"
   },
   {
     "wh": "OKC",
     "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - R8444771AB - Inv 4073518 - DLR NAME - CLAIM 507920 (AER)",
-    "due": "2026-04-17"
-  },
-  {
-    "wh": "Charlotte",
-    "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - R8090720AI - Inv 4087548 - GRIFFIN CDJ - CLAIM 525531 (AER)",
-    "due": "2026-04-24"
-  },
-  {
-    "wh": "Charlotte",
-    "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - R8599680AB - Inv 3941822 - NORTH KNOXVILLE CD - CLAIM 519178 (AER)",
-    "due": "2026-04-24"
-  },
-  {
-    "wh": "Charlotte",
-    "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - 68498557AB - Inv 4036003 - ABERNATH CJD - CLAIM 525303 (AER)",
-    "due": "2026-04-24"
+    "task": "CHRYSLER OUTBOUND DAMAGE - Inv 4261216 -  68546814AA - JOE COOPER CDJR - CLAIM # AFS 128548",
+    "due": "2026-06-26"
   },
   {
     "wh": "Phoenix",
-    "action": "WH P/U from dealer",
-    "task": "CHRYSLER DAMAGE - R8444771AB - Inv 4080628 - CHAPMAN AUTO CTR - CLAIM 525438 (AER)",
-    "due": "2026-04-24"
+    "action": "WH Please Respond",
+    "task": "***CHRYSLER WRONG PART *** - PO# - PART#CSANZ871AA - QTY -2 CLAIM",
+    "due": "2026-05-20"
   },
   {
-    "wh": "Charlotte",
+    "wh": "Ontario",
     "action": "WH P/U from dealer",
-    "task": "CHRYSLER OUTBOUND DAMAGE - 68184732AC - BIG O DODGE CJ - Inv 4104470 - MRA-2026-003871CLAIM # AFS 128201",
-    "due": "2026-05-01"
+    "task": "CHRYSLER OUTBOUND DAMAGE - 68370968AC - CARL BURGER DODGE - CLAIM # AFS 128447",
+    "due": "2026-06-19"
+  },
+  {
+    "wh": "Ontario",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - 68411234AA - Inv 4180408  - JACK POWELL CDJR - CLAIM 609960 (AER)",
+    "due": "2026-05-29"
   },
   {
     "wh": "Flowood",
     "action": "WH P/U from dealer",
-    "task": "CHRYSLER OUTBOUND DAMAGE - 68498557AB - JOHNSON DODGE - Inv 4134482 CLAIM #AFS 128202",
-    "due": "2026-05-01"
+    "task": "CHRYSLER DAMAGE - R8409343AA - Inv 4207371  - DAVID TAYLOR CD - CLAIM 596111(AER)",
+    "due": "2026-05-29"
+  },
+  {
+    "wh": "Atlanta",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - 68447105AA - Inv 3743711  - JUBILEE CDJR - CLAIM 581833(AER)",
+    "due": "2026-05-29"
   },
   {
     "wh": "Charlotte",
-    "action": "WH Please Respond",
-    "task": "CHRYSLER DAMAGE - PO# 1324355 - PART# R8453637AB - 1 - CLAIM",
-    "due": "2026-04-03"
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER OUTBOUND DAMAGE - R8051225AG - NORTHPOINT CJD - CLAIM # AFS 128568",
+    "due": "2026-06-26"
+  },
+  {
+    "wh": "Orlando",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - CSPM44A4AA - Inv 4133946 - ARRIGO CDJR OF TAMARAC - CLAIM 571390 (AER)",
+    "due": "2026-05-22"
+  },
+  {
+    "wh": "Flowood",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER DAMAGE - R8570759AA - Inv 4136774 - BROWN CDJ - CLAIM 550443 (AER)",
+    "due": "2026-05-15"
+  },
+  {
+    "wh": "Charlotte",
+    "action": "WH P/U from dealer",
+    "task": "CHRYSLER OUTBOUND DAMAGE - 68184732AC - BIG O DODGE - INV 4116977 - CLAIM # AFS 128232",
+    "due": "2026-05-01"
   }
 ];
-const fordTotal     = 55;
-const chrysTotal    = 64;
-const fordGe90      = 0;
-const chrysGe90     = 9;
-const fordBiggestWh = "Charlotte";
-const fordBiggestN  = 16;
+const fordTotal     = 71;
+const chrysTotal    = 101;
+const fordGe90      = 2;
+const ford6089      = 4;
+const chrysGe90     = 27;
+const fordBiggestWh = "Atlanta";
+const fordBiggestN  = 18;
 const chrysBiggestWh= "Charlotte";
-const chrysBiggestN = 15;
-const fordOldestDays  = 77;
-const fordOldestWh    = "Charlotte";
-const chrysOldestDays = 98;
+const chrysBiggestN = 23;
+const fordOldestDays  = 107;
+const fordOldestWh    = "Ontario";
+const chrysOldestDays = 149;
 const chrysOldestWh   = "Charlotte";
 // @@DATA_END@@
+document.getElementById('asOfDate').textContent = 'As of ' + AS_OF;
+document.getElementById('fordTotalVal').textContent      = fordTotal;
+document.getElementById('fordBiggestWhVal').textContent  = fordBiggestWh;
+document.getElementById('fordBiggestNSub').textContent   = fordBiggestN + ' open claims';
+document.getElementById('ford6089Val').textContent       = ford6089;
+document.getElementById('fordOldestDaysVal').textContent = fordOldestDays;
+document.getElementById('fordOldestWhSub').textContent   = 'days open (' + fordOldestWh + ')';
+document.getElementById('chrysTotalVal').textContent      = chrysTotal;
+document.getElementById('chrysBiggestWhVal').textContent  = chrysBiggestWh;
+document.getElementById('chrysBiggestNSub').textContent   = chrysBiggestN + ' open claims';
+document.getElementById('chrysGe90Val').textContent       = chrysGe90;
+document.getElementById('chrysOldestDaysVal').textContent = chrysOldestDays;
+document.getElementById('chrysOldestWhSub').textContent   = 'days open (' + chrysOldestWh + ')';
 // ─── CHART HELPERS ───────────────────────────────────────
 const AGE_COLORS = ["#22c55e","#facc15","#f97316","#ef4444"];
 const AGE_LABELS = ["<30 days","30–59 days","60–89 days","≥90 days"];

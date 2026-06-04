@@ -37,9 +37,10 @@ def _summary_rows(df):
 
 
 def _oldest_rows(combined_all, dataset_name, n=10):
+    status_col = 'Status' if 'Status' in combined_all.columns else 'Progress'
     open_df = combined_all[
         (combined_all['Dataset'] == dataset_name) &
-        (combined_all['Progress'] != 'Completed')
+        (combined_all[status_col] != 'Completed')
     ].copy()
     open_df['Start Date'] = pd.to_datetime(open_df['Start Date'], errors='coerce')
     today = pd.Timestamp('today').normalize()
@@ -103,6 +104,7 @@ def build_data_js():
     chrys_total       = sum(r['total'] for r in chrys_sum)
     ford_ge90         = sum(r['ge90']  for r in ford_sum)
     chrys_ge90        = sum(r['ge90']  for r in chrys_sum)
+    ford_6089         = sum(r['d60']   for r in ford_sum)
     ford_biggest      = max(ford_sum,  key=lambda r: r['total']) if ford_sum  else {'wh': '', 'total': 0}
     chrys_biggest     = max(chrys_sum, key=lambda r: r['total']) if chrys_sum else {'wh': '', 'total': 0}
     ford_oldest_days  = max((r['days'] for r in ford_old),  default=0)
@@ -125,6 +127,7 @@ def build_data_js():
         'const fordTotal     = {};'.format(ford_total),
         'const chrysTotal    = {};'.format(chrys_total),
         'const fordGe90      = {};'.format(ford_ge90),
+        'const ford6089      = {};'.format(ford_6089),
         'const chrysGe90     = {};'.format(chrys_ge90),
         'const fordBiggestWh = {};'.format(json.dumps(ford_biggest['wh'])),
         'const fordBiggestN  = {};'.format(ford_biggest['total']),

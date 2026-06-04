@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 # ── Column normalisation helpers ───────────────────────────────────────────
 
 _COLUMN_MAP = {
-    "Warehouse":      ["warehouse", "wh", "facility", "site", "location"],
+    "Warehouse":      ["warehouse", "wh", "facility", "site", "location", "bucket name", "bucket"],
     "Start Date":     ["start date", "open date", "opened date", "date opened", "created date"],
     "Completed Date": ["completed date", "close date", "closed date", "completion date", "resolved date"],
     "Task Name":      ["task name", "task", "claim", "description", "title", "name"],
@@ -79,7 +79,9 @@ def load_claims_file(filepath: Path) -> pd.DataFrame:
         raise FileNotFoundError(f"Claims file not found: {filepath}")
 
     log.info("Loading: %s", filepath.name)
-    df = pd.read_excel(filepath, engine="openpyxl")
+    xl = pd.ExcelFile(filepath, engine="openpyxl")
+    sheet = "Consolidated Data" if "Consolidated Data" in xl.sheet_names else xl.sheet_names[0]
+    df = xl.parse(sheet)
     df = normalize_columns(df)
     log.info("  → %d rows, %d columns", len(df), len(df.columns))
     return df
