@@ -3,7 +3,7 @@
 This project analyzes **dealer claims** from one or more Excel workbooks and produces:
 - **Cycle‑time performance by Bucket Name** (count, mean, median, min, max days)
 - **Pareto of Labels** (overall and **by warehouse**)
-- **Power BI–ready exports** for dashboards
+- **HTML dashboards** for interactive reporting
 - A **date‑range filter** that can be applied to *Created Date*, *Completed Date*, or *Either*
 
 Primary notebook: **`Claims_Analysis_Pareto_Multi.ipynb`**
@@ -30,7 +30,7 @@ You can limit analysis to a date window by **Created Date**, **Completed Date**,
 
 ## Outputs
 
-A single Excel workbook is written to disk (default: **`Claims_Performance_Summary_ALL.xlsx`**), containing Power BI–ready tables:
+A single Excel workbook is written to disk (default: **`Claims_Performance_Summary_ALL.xlsx`**), containing the following tables:
 
 - `Bucket_Performance` — **Dataset, Bucket Name, Count, Mean, Median, Min, Max**
 - `Bucket_Performance_ALL` — Combined view across *all* datasets
@@ -47,7 +47,7 @@ A single Excel workbook is written to disk (default: **`Claims_Performance_Summa
 1. Open **`Claims_Analysis_Pareto_Multi.ipynb`** in Jupyter (VS Code, JupyterLab, etc.).  
 2. In the **Parameters** cell, confirm file names, warehouse list, and date filter settings.  
 3. Run all cells.  
-4. Find the export at **`Claims_Performance_Summary_ALL.xlsx`** and connect it to Power BI (Get Data → Excel).
+4. Find the generated HTML dashboard file and open it in any browser.
 
 ### Dependencies
 Python 3.9+ recommended.
@@ -85,7 +85,7 @@ END_DATE   = None             # e.g., "2025-06-30"
 ## Cell‑by‑Cell Explanation
 
 **1) Markdown — Title & Scope**  
-States the notebook’s purpose: multi‑file analysis, cycle times, Pareto (overall & by warehouse), Power BI exports, and date filtering.
+States the notebook’s purpose: multi‑file analysis, cycle times, Pareto (overall & by warehouse), HTML dashboard generation, and date filtering.
 
 **2) Markdown — Inputs**  
 Describes expected files/sheet and required columns.
@@ -138,25 +138,21 @@ Shows the first 15 rows of `overall_all`.
 **11) Code — Pareto Charts**  
 Generates Pareto charts for each **Dataset + Warehouse** (limited to `TOP_N_LABELS`), then repeats for the combined **ALL** dataset.
 
-**12) Code — Export for Power BI (Filtered)**  
+**12) Code — Export (Filtered)**  
 Writes **five** sheets to `OUTPUT_XLSX`:  
 - `Bucket_Performance` (per dataset)  
 - `Bucket_Performance_ALL` (combined)  
 - `Pareto_Labels_Overall` (ALL + per‑dataset)  
 - `Pareto_Labels_By_Warehouse` (ALL + per‑dataset)  
 - `Detailed_Data` (filtered rows with `Cycle Time (Days)` and `Dataset`)  
-Prints the resolved path after export.
+Prints the resolved path after export. Also generates an **HTML dashboard** file for browser-based viewing.
 
 ---
 
-## Power BI Tips
-- Use *Get Data → Excel* and connect to `Claims_Performance_Summary_ALL.xlsx`.
-- Mark your date columns as **date** types.
-- Popular visuals:
-  - **Pareto**: Clustered column (Count) + line (Cumulative %) with shared X axis.
-  - **Bucket performance**: Table or bar chart of **Mean/Median** cycle time by **Bucket Name**.
-  - Add **Slicers** for `Dataset`, `Warehouse`, and `Labels`.  
-- Keep your data files in a consistent path and set up a refresh schedule if desired.
+## HTML Dashboard
+- The notebook generates a self-contained **HTML file** that can be opened in any browser — no additional software required.
+- Charts include Pareto views by label and warehouse, and cycle-time summaries by Bucket Name.
+- Share the HTML file directly; it requires no server or dependencies to view.
 
 ---
 
