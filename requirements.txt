@@ -44,3 +44,8 @@ traitlets==5.14.3
 tzdata==2025.2
 wcwidth==0.2.13
 wheel==0.45.1
+# Graph API auth — manual fallback (download_planner.py)
+msal>=1.28
+requests>=2.31
+# Browser automation — primary download path (download_planner_browser.py)
+playwright>=1.44

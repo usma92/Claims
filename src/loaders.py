@@ -6,7 +6,7 @@ calls outside this module.
 """
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import pandas as pd
 
@@ -36,9 +36,12 @@ def find_column(df: pd.DataFrame, candidates: List[str]) -> Optional[str]:
     return None
 
 
-def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+def normalize_columns(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
     """
     Standardise column names and dtypes across input files.
+
+    Returns:
+        (df_normalized, rename_map) — tuple so notebooks can unpack both.
 
     Canonical schema after normalization:
         Warehouse, Start Date, Completed Date, Task Name, Labels, Due Date
@@ -59,10 +62,15 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     for col in df.select_dtypes(include="object").columns:
         df[col] = df[col].str.strip()
 
-    return df
+    return df, rename
 
 
-# ── Public loader ──────────────────────────────────────────────────────────
+# ── Public loaders ──────────────────────────────────────────────────────────
+
+def load_excel(filepath: Path, **_kwargs) -> pd.DataFrame:
+    """Alias for load_claims_file — notebook import compatibility."""
+    return load_claims_file(filepath)
+
 
 def load_claims_file(filepath: Path) -> pd.DataFrame:
     """
@@ -84,6 +92,6 @@ def load_claims_file(filepath: Path) -> pd.DataFrame:
     xl = pd.ExcelFile(filepath, engine="openpyxl")
     sheet = "Consolidated Data" if "Consolidated Data" in xl.sheet_names else xl.sheet_names[0]
     df = xl.parse(sheet)
-    df = normalize_columns(df)
-    log.info("  → %d rows, %d columns", len(df), len(df.columns))
+    df, _ = normalize_columns(df)
+    log.info("  -> %d rows, %d columns", len(df), len(df.columns))
     return df
