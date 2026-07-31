@@ -4,3 +4,5 @@ __pycache__/
 *.pyo
 .ipynb_checkpoints/
 ~$*
+data/.auth.json
+data/.token_cache.json

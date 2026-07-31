@@ -20,9 +20,9 @@ NORMAL USAGE:
     python scripts/download_planner_browser.py --plan Ford  # single plan
 
 OUTPUT:
-    data/raw/Ford_Claims.xlsx
-    data/raw/Chrysler_Claims.xlsx
-    data/archive/Ford_Claims_<timestamp>.xlsx  (previous file archived)
+    data/raw/Ford Claims Planner.xlsx
+    data/raw/Chrysler Claims Planner.xlsx
+    data/archive/Ford Claims Planner_<timestamp>.xlsx  (previous file archived)
 """
 
 from __future__ import annotations
@@ -34,11 +34,24 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# Force UTF-8 stdout/stderr regardless of the console's codepage — Task
+# Scheduler and cmd.exe default to cp1252, which can't encode the arrows/dashes
+# printed below and would crash the script after the download already saved.
+if sys.stdout.encoding is not None and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 # ─── Configuration ─────────────────────────────────────────────────────────────
 
 PLANS = {
     "Ford":     "jRdOeWc20kuFagvcx_OkrmUABPJd",
     "Chrysler": "hYGA2uMjlE-9NFjXfoUFeWUAGOP3",
+}
+
+# Output filenames must match config/settings.yaml's input_files entries.
+FILENAMES = {
+    "Ford":     "Ford Claims Planner.xlsx",
+    "Chrysler": "Chrysler Claims Planner.xlsx",
 }
 
 PLANNER_BASE = "https://planner.cloud.microsoft/webui/plan"
@@ -57,10 +70,11 @@ EXPORT_TIMEOUT    = 90_000   # ms
 
 def archive_existing(label: str, ts: str) -> None:
     """Move current raw file to archive with timestamp."""
-    for ext in [".xlsx", ".xls"]:
-        f = RAW_DIR / f"{label}_Claims{ext}"
+    base = Path(FILENAMES[label])
+    for ext in [base.suffix, ".xls"]:
+        f = RAW_DIR / f"{base.stem}{ext}"
         if f.exists():
-            dest = ARCH_DIR / f"{label}_Claims_{ts}{ext}"
+            dest = ARCH_DIR / f"{base.stem}_{ts}{ext}"
             shutil.move(str(f), str(dest))
             print(f"    Archived → archive/{dest.name}")
             return
@@ -95,7 +109,7 @@ def export_plan(page, plan_id: str, label: str) -> None:
         page.click("text=Export as Excel")
 
     download = dl_info.value
-    dest = RAW_DIR / f"{label}_Claims.xlsx"
+    dest = RAW_DIR / FILENAMES[label]
     download.save_as(str(dest))
 
     size_kb = dest.stat().st_size // 1024
@@ -245,7 +259,7 @@ def main() -> None:
 
     print("\nDone.")
     print("Files in data/raw/:")
-    for f in sorted(RAW_DIR.glob("*_Claims.xlsx")):
+    for f in sorted(RAW_DIR.glob("*Claims Planner.xlsx")):
         print(f"  {f.name}  ({f.stat().st_size // 1024} KB)")
 
 

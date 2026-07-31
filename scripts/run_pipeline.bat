@@ -1,6 +1,6 @@
 @echo off
 :: run_pipeline.bat — Claims data download
-:: Registered in Task Scheduler for monthly execution.
+:: Registered in Task Scheduler for daily execution.
 :: Self-locating: works regardless of where the project folder lives.
 
 setlocal
@@ -14,5 +14,5 @@ if errorlevel 1 (
     exit /b 1
 )
 
-python scripts\download_planner.py
+python scripts\download_planner_browser.py
 exit /b %errorlevel%
