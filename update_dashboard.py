@@ -36,6 +36,17 @@ def _summary_rows(df):
     return rows
 
 
+def _closed_last30_rows(combined_all, dataset_name, warehouses):
+    df = combined_all[combined_all['Dataset'] == dataset_name].copy()
+    df['Completed Date'] = pd.to_datetime(df['Completed Date'], errors='coerce')
+    cutoff = pd.Timestamp('today').normalize() - pd.Timedelta(days=30)
+    closed30 = df[df['Completed Date'] >= cutoff]
+    counts = closed30.groupby('Warehouse').size()
+    rows = [{'wh': wh, 'total': int(counts.get(wh, 0))} for wh in warehouses]
+    rows.sort(key=lambda r: r['total'], reverse=True)
+    return rows
+
+
 def _oldest_rows(combined_all, dataset_name, n=10):
     status_col = 'Status' if 'Status' in combined_all.columns else 'Progress'
     open_df = combined_all[
@@ -93,6 +104,8 @@ def build_data_js():
 
     ford_sum   = _summary_rows(aging_summary[aging_summary['Dataset'] == 'Ford Claims'])
     chrys_sum  = _summary_rows(aging_summary[aging_summary['Dataset'] == 'Chrysler Claims'])
+    ford_closed30  = _closed_last30_rows(combined_all, 'Ford Claims',     [r['wh'] for r in ford_sum])
+    chrys_closed30 = _closed_last30_rows(combined_all, 'Chrysler Claims', [r['wh'] for r in chrys_sum])
     ford_old   = _oldest_rows(combined_all, 'Ford Claims')
     chrys_old  = _oldest_rows(combined_all, 'Chrysler Claims')
     ford_acts        = _action_rows(open_tasks_agg, 'Ford Claims')
@@ -118,6 +131,8 @@ def build_data_js():
         'const AS_OF         = {};'.format(json.dumps(as_of)),
         'const fordSummary   = {};'.format(json.dumps(ford_sum,   indent=2)),
         'const chrysSummary  = {};'.format(json.dumps(chrys_sum,  indent=2)),
+        'const fordClosed30  = {};'.format(json.dumps(ford_closed30,  indent=2)),
+        'const chrysClosed30 = {};'.format(json.dumps(chrys_closed30, indent=2)),
         'const fordOldest    = {};'.format(json.dumps(ford_old,   indent=2)),
         'const chrysOldest   = {};'.format(json.dumps(chrys_old,  indent=2)),
         'const fordActions       = {};'.format(json.dumps(ford_acts,         indent=2)),
